@@ -9,6 +9,9 @@ exports.diff2html = function(diff) {
 }
 
 //-------------
+// Originally from https://github.com/pieter/gitx
+// (C) Some rights reserved. GPL v2. Pieter de Bie 
+//-------------
 
 /*
  * GitX Javascript library
@@ -151,7 +154,7 @@ var highlightDiff = function(diff, element, callbacks) {
 
 			continue;
 		}
-		diffContent += "<tr>";
+
 		if (header) {
 			if (firstChar == "n") {
 				if (l.match(/^new file mode .*$/))
@@ -224,14 +227,18 @@ var highlightDiff = function(diff, element, callbacks) {
 			// Highlight trailing whitespace
 			if (m = l.match(/\s+$/))
 				l = l.replace(/\s+$/, "<span class='whitespace'>" + m + "</span>");
-
+				
+			diffContent += "<tr>";
 			diffContent += "<td class='lineno'>" + " " + "</td>";
 			diffContent += "<td class='lineno'>" + ++hunk_start_line_2 + "</td>";
 			diffContent += "<td " + sindex + "class='addline'>" + l + "</td>";
+			diffContent += "</tr>";
 		} else if (firstChar == "-") {
+			diffContent += "<tr>";
 			diffContent += "<td class='lineno'>" + ++hunk_start_line_1 + "</td>";
 			diffContent += "<td class='lineno'>" + " " + "</td>";
 			diffContent += "<td " + sindex + "class='delline'>" + l + "</td>";
+			diffContent += "</tr>";
 		} else if (firstChar == "@") {
 			if (header) {
 				header = false;
@@ -242,16 +249,19 @@ var highlightDiff = function(diff, element, callbacks) {
 				hunk_start_line_1 = parseInt(m[1]) - 1;
 				hunk_start_line_2 = parseInt(m[2]) - 1;
 			}
+			diffContent += "<tr>";
 			diffContent += "<td class='lineno'>" + "..." + "</td>";
 			diffContent += "<td class='lineno'>" + "..." + "</td>";
 			diffContent += "<td " + sindex + "class='hunkheader'>" + l + "</td>";
+			diffContent += "</tr>";
 		} else if (firstChar == " ") {
+			diffContent += "<tr>";
 			diffContent += "<td class='lineno'>" + ++hunk_start_line_1 + "</td>";
 			diffContent += "<td class='lineno'>" + ++hunk_start_line_2 + "</td>";
 			diffContent += "<td " + sindex + "class='noopline'>" + l + "</td>";
+			diffContent += "</tr>";
 		}
 		lindex++;
-		diffContent += "</tr>";
 	}
 	
 	finishContent();
