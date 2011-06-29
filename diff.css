@@ -31,7 +31,6 @@
 }
 
 .diff .lineno {
-	float: left;
 	padding-left: 4px;
 	padding-right: 4px;
 	background-color: #ECECEC;
@@ -42,6 +41,19 @@
 	border-bottom: 0px;
 	width: 1px; /*force fixed width to longest line no length*/
 	text-align: right;
+}
+
+.diff .noteRow {
+	background-color: #FAFAFA;
+	border: 2px solid #DDDDDD;
+	white-space: normal;
+}
+
+.diff .noteMessage {
+	padding: 24px;
+	color: black;
+	border: 2px solid #DDDDDD;
+	white-space: normal;
 }
 
 .diff .lines {
