@@ -14,8 +14,9 @@
 	border-spacing: 0px;
 	padding: 0px;
 	border-collapse:collapse;
-	white-space: nowrap;
+	white-space: pre;
 }
+
 
 .diff .fileHeader {
 	margin-top: -5px;
