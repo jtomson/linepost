@@ -46,7 +46,7 @@ var highlightDiff = function(diff, element, callbacks) {
 		callbacks = {};
 	var start = new Date().getTime();
 	element.className = "diff"
-	var content = diff.escapeHTML().replace(/\t/g, "    ");;
+	var content = diff.escapeHTML().replace(/\t/g, "    ");
 
 	var file_index = 0;
 
@@ -69,67 +69,44 @@ var highlightDiff = function(diff, element, callbacks) {
 
 	var finishContent = function()
 	{
-		
-		if (!file_index)
-		{
+		if (!file_index) {
 			file_index++;
 			return;
 		}
 
-		if (callbacks["newfile"])
-			callbacks["newfile"](startname, endname, "file_index_" + (file_index - 1), mode_change, old_mode, new_mode);
-
 		var title = startname;
-		var binaryname = endname;
-		if (endname == "/dev/null") {
-			binaryname = startname;
-			title = startname;
-		}
-		else if (startname == "/dev/null")
-			title = endname;
-		else if (startname != endname)
-			title = startname + " renamed to " + endname;
 		
-		if (binary && endname == "/dev/null") {	// in cases of a deleted binary file, there is no diff/file to display
-			line1 = "";
-			line2 = "";
-			diffContent = "";
-			file_index++;
-			startname = "";
-			endname = "";
-			return;				// so printing the filename in the file-list is enough
+		if (startname == "/dev/null") {
+			title = endname;
+		}
+		else if (startname != endname) {
+			title = startname + " renamed to " + endname;
 		}
 
-		if (diffContent != "" || binary) {
+		// If there's a diff or a binary file that hasn't been deleted, we'll make an element
+		if (diffContent != "" || (binary && endname != "/dev/null")) {
+
 			finalContent += '<div class="file" id="file_index_' + (file_index - 1) + '">' +
-				'<div class="fileHeader">' + title + '</div>';
-		}
-
-		if (!binary && (diffContent != ""))  {
-			finalContent +=		'<div class="diffContent">' + diffContent + '</div>';
-								// '<div class="lineno">' + line1 + "</div>" +
-								// '<div class="lineno">' + line2 + "</div>" +
-								// '<div class="lines">' + diffContent + "</div>" +
-								//'</div>';
-		}
-		else {
+							'<div class="fileHeader">' + title + '</div>';
+				
 			if (binary) {
-				if (callbacks["binaryFile"])
-					finalContent += callbacks["binaryFile"](binaryname);
-				else
-					finalContent += "<div>Binary file differs</div>";
+				finalContent += "<div>Binary file differs</div>";			}
+			else {
+				finalContent +=	 '<div class="diffContent">' + diffContent + '</div>';
 			}
+			
+			finalContent += '</div>';
 		}
 
-		if (diffContent != "" || binary)
-			finalContent += '</div>';
-
+		// reset bookkeeping
 		line1 = "";
 		line2 = "";
 		diffContent = "";
-		file_index++;
 		startname = "";
 		endname = "";
+		
+		// next up
+		file_index++;
 	}
 	
 	for (var lineno = 0, lindex = 0; lineno < lines.length; lineno++) {
@@ -137,20 +114,28 @@ var highlightDiff = function(diff, element, callbacks) {
 
 		var firstChar = l.charAt(0);
 
-		if (firstChar == "d" && l.charAt(1) == "i") {			// "diff", i.e. new file, we have to reset everything
-			header = true;						// diff always starts with a header
+		if (firstChar == "d" && l.charAt(1) == "i") { // "diff", i.e. new file, we have to reset everything
+			// diff always starts with a header
+			header = true;
 
+			// finish previous file ?
 			diffContent += "</table>";
-			finishContent(); // Finish last file
+			
+			finishContent();
+			
 			diffContent = "<table>";
 
 			binary = false;
 			mode_change = false;
-
-			if(match = l.match(/^diff --git (a\/)+(.*) (b\/)+(.*)$/)) {	// there are cases when we need to capture filenames from
-				startname = match[2];					// the diff line, like with mode-changes.
-				endname = match[4];					// this can get overwritten later if there is a diff or if
-			}								// the file is binary
+			
+			// there are cases when we need to capture filenames from
+			// the diff line, like with mode-changes.
+			// this can get overwritten later if there is a diff or if
+			// the file is binary
+			if(match = l.match(/^diff --git (a\/)+(.*) (b\/)+(.*)$/)) {	
+				startname = match[2];
+				endname = match[4];
+			}
 
 			continue;
 		}
@@ -233,34 +218,37 @@ var highlightDiff = function(diff, element, callbacks) {
 			diffContent += "<td class='lineno'>" + ++hunk_start_line_2 + "</td>";
 			diffContent += "<td " + sindex + "class='addline'>" + l + "</td>";
 			diffContent += "</tr>";
-		} else if (firstChar == "-") {
+		}
+		else if (firstChar == "-") {
 			diffContent += "<tr>";
 			diffContent += "<td class='lineno'>" + ++hunk_start_line_1 + "</td>";
 			diffContent += "<td class='lineno'>" + " " + "</td>";
 			diffContent += "<td " + sindex + "class='delline'>" + l + "</td>";
 			diffContent += "</tr>";
-		} else if (firstChar == "@") {
-			if (header) {
-				header = false;
-			}
-
-			if (m = l.match(/@@ \-([0-9]+),?\d* \+(\d+),?\d* @@/))
-			{
+		}
+		else if (firstChar == "@") {
+			
+			header = false;
+			
+			if (m = l.match(/@@ \-([0-9]+),?\d* \+(\d+),?\d* @@/)) {
 				hunk_start_line_1 = parseInt(m[1]) - 1;
 				hunk_start_line_2 = parseInt(m[2]) - 1;
 			}
+			
 			diffContent += "<tr>";
 			diffContent += "<td class='lineno'>" + "..." + "</td>";
 			diffContent += "<td class='lineno'>" + "..." + "</td>";
 			diffContent += "<td " + sindex + "class='hunkheader'>" + l + "</td>";
 			diffContent += "</tr>";
-		} else if (firstChar == " ") {
+		}
+		else if (firstChar == " ") {
 			diffContent += "<tr>";
 			diffContent += "<td class='lineno'>" + ++hunk_start_line_1 + "</td>";
 			diffContent += "<td class='lineno'>" + ++hunk_start_line_2 + "</td>";
 			diffContent += "<td " + sindex + "class='noopline'>" + l + "</td>";
 			diffContent += "</tr>";
 		}
+		
 		lindex++;
 	}
 	
