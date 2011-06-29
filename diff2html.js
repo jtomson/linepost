@@ -18,7 +18,7 @@ var input = fs.readFileSync('/dev/stdin').toString();
 var diffHtml = diffHighlighter.diff2html(input);
 
 // Get notes for commit
-var notes = [{file: 1, diffline: 2, message: 'I will gladly pay you tuesday for this *hamburger* today\n -James'}];
+var notes = [{file: 1, diffline: 6, message: 'I will gladly pay you tuesday for this **hamburger** todayI will gladly pay you tuesday for this **hamburger** todayI will gladly pay you tuesday for this **hamburger** todayI will gladly pay you tuesday for this **hamburger** todayI will gladly pay you tuesday for this **hamburger** todayI will gladly pay you tuesday for this **hamburger** todayI will gladly pay you tuesday for this **hamburger** today\n -James'}];
 
 // TODO Get html from notes (markdown) ?
 

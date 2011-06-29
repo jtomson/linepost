@@ -1,3 +1,8 @@
+.diff {
+    font-size: 14px;
+    margin: 0 auto;
+    width: 920px;
+}
 .diff .file {
 	margin: 10px;
 	padding: 10px;
@@ -44,16 +49,19 @@
 }
 
 .diff .noteRow {
+    font-family: Arial, Helvetica;
 	background-color: #FAFAFA;
 	border: 2px solid #DDDDDD;
-	white-space: normal;
+	text-align: right;
+	padding: 4px;
 }
 
 .diff .noteMessage {
-	padding: 24px;
 	color: black;
 	border: 2px solid #DDDDDD;
-	white-space: normal;
+	white-space: pre-wrap;
+	text-align: left;
+	padding-left: 8px;
 }
 
 .diff .lines {
