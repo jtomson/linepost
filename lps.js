@@ -1,5 +1,6 @@
 var express = require('express'),
     connect = require('connect'),
+    sys = require('sys'),
     exec = require('child_process').exec,
     app = express.createServer();
 
@@ -67,6 +68,7 @@ var _api_sendGitShow = function(repo_dir_path, sha, res) {
                             'author-date': split_output_array[3],
                             'diff': split_output_array[4]
                         });
+                        
                       res.writeHead(200, {'Content-Length': stringified_commit.length,
                                           'Content-Type': 'application/json'});
                       res.write(stringified_commit);
@@ -77,8 +79,15 @@ var _api_sendGitShow = function(repo_dir_path, sha, res) {
           });
 }
 
+var _content_sendCommitPage = function(repo, sha, res) {
+    // TODO render template, include ajax-pull to api
+    res.render('commit.haml', {
+        locals: {'sha': sha},
+        layout: false});
+}
+
 var _isGoodSha = function(sha) {
-    var sha_matches = sha.match(/(?:\d|[a-e]){6,40}/i);
+    var sha_matches = sha.match(/(?:\d|[a-f]){6,40}/i);
     return (sha_matches !== null && sha_matches.length == 1);
 }
 
@@ -91,13 +100,30 @@ app.get('/api/git-show/:repo/:sha', function(req, res) {
     // Do we have this repo name mapped to a local dir?
     if (_repos[repo] === undefined) {
         // TODO - nicer 404
-        _api_sendError(404, 'Undefined repo: "' + repo + '"', res);
+        _api_sendError(404, 'undefined repo: "' + repo + '"', res);
     }
     else if (_isGoodSha(sha)) {
         _api_sendGitShow(_repos[req.params.repo], req.params.sha, res);
     }
     else {
-        _api_sendError(404, 'Bad sha: "' + sha + '"', res);
+        _api_sendError(404, 'bad sha: "' + sha + '"', res);
+    }
+});
+
+app.get('/:repo/:sha', function(req, res) {
+    var repo = req.params.repo;
+    var sha = req.params.sha;
+    
+    // Do we have this repo name mapped to a local dir?
+    if (_repos[repo] === undefined) {
+        // TODO - nicer 404
+        _content_sendError(404, 'Undefined repo: "' + repo + '"', res);
+    }
+    else if (_isGoodSha(sha)) {
+        _content_sendCommitPage(_repos[req.params.repo], req.params.sha, res);
+    }
+    else {
+        _content_sendError(404, 'Bad sha: "' + sha + '"', res);
     }
 });
 
