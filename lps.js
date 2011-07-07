@@ -1,9 +1,3 @@
-var express = require('express'),
-    connect = require('connect'),
-    sys = require('sys'),
-    exec = require('child_process').exec,
-    app = express.createServer();
-
 // ----------------
 // command for git bin
 var _git_bin = 'git';
@@ -12,7 +6,47 @@ var _git_bin = 'git';
 var _repos = {};
 
 _repos['linepost'] = '/Users/james/sandbox/linepost';
+
+// sqlite db
+var _db = {};
+var _db_path = 'lps.sdb';
+
 // ----------------
+
+var express = require('express'),
+    connect = require('connect'),
+    sys = require('sys'),
+    fs = require('fs'),
+    exec = require('child_process').exec,
+    sqlite3 = require('sqlite3').verbose(),
+    app = express.createServer();
+
+//-------------------------
+// Initialization
+//-------------------------
+
+(function() {
+    var is_new_db = false;
+    
+    try {
+        fs.lstatSync(_db_path);
+    }
+    catch (error) {
+        is_new_db = true;
+    }
+    
+    _db = new sqlite3.Database(_db_path, function(error) { if (error) throw error; });
+    
+    // calls are queued so we can start using the db even if we haven't completed open above
+    if (is_new_db) {
+        _db.run('CREATE TABLE lps( ' +
+                'id INTEGER PRIMARY KEY AUTOINCREMENT, ' +
+                'commit_sha TEXT, ' +
+                'file_idx INTEGER, ' +
+                'diff_row INTEGER, ' +
+                'comment TEXT );', function(error) {if (error) throw error;} );
+    }
+})();
 
 var _api_sendError = function(error_code, error_msg, res) {
     var error_stringified = JSON.stringify({'error': error_msg});
