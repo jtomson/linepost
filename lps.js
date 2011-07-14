@@ -2,7 +2,7 @@
 // command for git bin
 var _git_bin = 'git';
 
-// repo name -> local repo dir map
+// repo_name -> local repo dir map
 var _repos = {
     'linepost': '/Users/james/sandbox/linepost'
 };
@@ -42,6 +42,7 @@ var express = require('express'),
     if (is_new_db) {
         _db.run('CREATE TABLE comments( ' +
                 'id INTEGER PRIMARY KEY AUTOINCREMENT, ' +
+                'repo_name TEXT, ' +
                 'commit_sha TEXT, ' +
                 'file_idx INTEGER, ' +
                 'diff_row INTEGER, ' +
@@ -57,13 +58,44 @@ var _isGoodSha = function(sha) {
 
 // assumes comment is valid
 var _add_comment = function(comment, callback) {
-    _db.run('INSERT INTO comments VALUES(' +
-            'NULL, ' + // primary key,
-            '"' + comment.commit_sha + '" , ' +
-            comment.file_idx + ', ' +
-            comment.diff_row + ', ' +
-            '"' + comment.comment_text + '" );', callback);
+    _db.run( 'INSERT INTO comments VALUES(NULL, $repo_name, $commit_sha, $file_idx, $diff_row, $comment_text)',
+             { '$repo_name': comment.repo_name,
+               '$commit_sha': comment.commit_sha,
+               '$file_idx': comment.file_idx,
+               '$diff_row': comment.diff_row,
+               '$comment_text': comment.comment_text
+             },
+             callback);
 };
+
+// assume params are clean
+var _get_comments = function(repo_name, sha, callback) {
+    // FIXME stores in memory so assuming not a whole lot of comments
+    _db.all( 'SELECT * from comments WHERE repo_name = $repo_name AND commit_sha = $commit_sha',
+             { '$repo_name': repo_name,
+               '$commit_sha': sha },
+             function(error, rows) { 
+                 if (error) { throw error; }
+                 callback(rows);
+             });
+};
+
+// Testing
+
+/*
+(function(){
+    _add_comment( {
+        'repo_name': 'linepost',
+        'commit_sha': 'ae12356677',
+        'file_idx': '1',
+        'diff_row': '2',
+        'comment_text': '"Hey there guy"'
+    },
+    function(error) { if(error) { throw error; } });
+    
+    _get_comments('linepost', 'ae12356677', function(rows) {console.log(sys.inspect(rows));});
+}());
+*/
 
 var _api_sendError = function(error_code, error_msg, res) {
     var error_stringified = JSON.stringify({'error': error_msg});
