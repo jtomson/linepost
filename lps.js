@@ -71,7 +71,7 @@ var _add_comment = function(comment, callback) {
 // assume params are clean
 var _get_comments = function(repo_name, sha, callback) {
     // FIXME stores in memory so assuming not a whole lot of comments
-    _db.all( 'SELECT * from comments WHERE repo_name = $repo_name AND commit_sha = $commit_sha',
+    _db.all( 'SELECT * from comments WHERE repo_name = $repo_name AND commit_sha LIKE $commit_sha || "%"',
              { '$repo_name': repo_name,
                '$commit_sha': sha },
              function(error, rows) { 
@@ -81,7 +81,6 @@ var _get_comments = function(repo_name, sha, callback) {
 };
 
 // Testing
-
 /*
 (function(){
     _add_comment( {
@@ -93,7 +92,7 @@ var _get_comments = function(repo_name, sha, callback) {
     },
     function(error) { if(error) { throw error; } });
     
-    _get_comments('linepost', 'ae12356677', function(rows) {console.log(sys.inspect(rows));});
+    _get_comments('linepost', 'ae12', function(rows) {console.log(sys.inspect(rows));});
 }());
 */
 
