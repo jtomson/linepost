@@ -1,7 +1,5 @@
 require.paths.unshift('/usr/local/lib/node/'); // bad brew install
 
-var diffHighlighter = require('./diffHighlighter');
-var showdown = require('./showdown.js');
 var fs = require('fs');
 var jsdom = require('jsdom');
 var sys = require('sys');
@@ -14,18 +12,25 @@ var output = '<!DOCTYPE html><html><head><link rel="stylesheet" type="text/css" 
 // Get commit diff
 var input = fs.readFileSync('/dev/stdin').toString();
 
-// Html-ize diff
-var diffHtml = diffHighlighter.diff2html(input);
 
 // Get notes for commit
 var notes = [{file: 1, diffline: 6, message: 'I will gladly pay you tuesday for this **hamburger** todayI will gladly pay you tuesday for this **hamburger** todayI will gladly pay you tuesday for this **hamburger** todayI will gladly pay you tuesday for this **hamburger** todayI will gladly pay you tuesday for this **hamburger** todayI will gladly pay you tuesday for this **hamburger** todayI will gladly pay you tuesday for this **hamburger** today\n -James'}];
 
 // TODO Get html from notes (markdown) ?
 
+var showdown = new Showdown.converter();
+var diffhighlighter = new DiffHighlighter.highlighter();
+
+// Html-ize diff
+var diffHtml = diffHighlighter.diff2html(input);
+
 // Place notes in diff html
 var composeNoteHtml = function(message) {
     return '<tr class="noteRow"><td colspan="2">Note: </td><td class="noteMessage">' + showdown.makeHtml(message) + '</td></tr>'
 };
+
+
+var html = showdown.makeHtml(text);
 
 jsdom.env(diffHtml,
           [

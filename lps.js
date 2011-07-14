@@ -1,3 +1,5 @@
+require.paths.unshift('/usr/local/lib/node/');
+
 var express = require('express'),
     connect = require('connect'),
     sys = require('sys'),
@@ -11,7 +13,7 @@ var _git_bin = 'git';
 // repo name -> local repo dir map
 var _repos = {};
 
-_repos['linepost'] = '/Users/james/sandbox/linepost';
+_repos['linepost'] = '/Users/jtomson/sandbox/linepost';
 // ----------------
 
 var _api_sendError = function(error_code, error_msg, res) {
@@ -79,10 +81,11 @@ var _api_sendGitShow = function(repo_dir_path, sha, res) {
           });
 }
 
-var _content_sendCommitPage = function(repo, sha, res) {
+var _content_sendCommitPage = function(reponame, sha, res) {
     // TODO render template, include ajax-pull to api
     res.render('commit.haml', {
-        locals: {'sha': sha},
+        locals: {'sha': sha,
+                 'repo': reponame },
         layout: false});
 }
 
@@ -91,7 +94,10 @@ var _isGoodSha = function(sha) {
     return (sha_matches !== null && sha_matches.length == 1);
 }
 
+// ----- App middleware + routing
 app.use(connect.logger());
+
+app.use(express.staticProvider(__dirname + '/static'));
 
 app.get('/api/git-show/:repo/:sha', function(req, res) {
     var repo = req.params.repo;
@@ -111,16 +117,16 @@ app.get('/api/git-show/:repo/:sha', function(req, res) {
 });
 
 app.get('/:repo/:sha', function(req, res) {
-    var repo = req.params.repo;
+    var reponame = req.params.repo;
     var sha = req.params.sha;
     
     // Do we have this repo name mapped to a local dir?
-    if (_repos[repo] === undefined) {
+    if (_repos[reponame] === undefined) {
         // TODO - nicer 404
         _content_sendError(404, 'Undefined repo: "' + repo + '"', res);
     }
     else if (_isGoodSha(sha)) {
-        _content_sendCommitPage(_repos[req.params.repo], req.params.sha, res);
+        _content_sendCommitPage(reponame, req.params.sha, res);
     }
     else {
         _content_sendError(404, 'Bad sha: "' + sha + '"', res);

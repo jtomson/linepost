@@ -1,14 +1,32 @@
 !!! strict
 %html(lang="en")
     %head
-        %title = "commit #{sha}"
+        %title = "commit #{sha} in #{repo}"
         
-        %link{rel: "stylesheet", type: "text/css", href: "commit.css"}
-        %link{rel: "stylesheet", type: "text/css", href: "diff.css"}
+        %link{rel: "stylesheet", type: "text/css", href: "/commit.css"}
+        %link{rel: "stylesheet", type: "text/css", href: "/diff.css"}
         
         %script{type: "text/javascript", src: "http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"}
-        %script{type: "text/javascript", src: "diffHighlighter.js"}
-        %script{type: "text/javascript", src: "showdown.js"}
-    %body
+        %script{type: "text/javascript", src: "/diffHighlighter.js"}
+        %script{type: "text/javascript", src: "/showdown.js"}
+        
+        :javascript
+          function getCommitJSON() {
+            $.getJSON("/api/git-show/#{repo}/#{sha}", function(data) {
+              $('#sha').get(0).innerHTML = data.sha;
+              $('#author-name-and-email').get(0).innerHTML = data['author-name-and-email'];
+              $('#subject-and-body').get(0).innerHTML = data['subject-and-body'];
+              $('#author-date').get(0).innerHTML = data['author-date'];
+              var highlighter = new DiffHighlighter.highlighter();
+              highlighter.highlightDiff(data.diff, $('#diff-content').get(0));
+            })
+            .error(function() {$('#diff-content').get(0).innerHTML = 'Error loading commit'});
+          }
+
+    %body{ onload: "getCommitJSON()" }
         .wrap
-            .content &= "loading..."
+            #sha
+            #author-name-and-email
+            #author-date
+            #subject-and-body
+            #diff-content &= "loading..."

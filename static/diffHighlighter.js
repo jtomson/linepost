@@ -1,8 +1,17 @@
 //-------------
 
-exports.diff2html = function(diff) {
+// "Namespace"
+var DiffHighlighter = {};
+
+// usage:
+// var highlighter = new DiffHighlighter.highlighter();
+// highlighter.highlightDiff(diff, element);
+
+DiffHighlighter.highlighter = function() {
+    
+this.diff2Html = function(diff) {
 	element = {};
-	highlightDiff(diff, element, {});
+	highlightDiff(diff, element);
 	return '<div class="' + element.className + '">'
 	       + element.innerHtml
 	       + '</div>';
@@ -30,20 +39,10 @@ String.prototype.unEscapeHTML = function() {
 
 //-------------
 
-// If we run from a Safari instance, we don't
-// have a Controller object. Instead, we fake it by
-// using the console
-if (typeof Controller == 'undefined') {
-	Controller = console;
-	Controller.log_ = console.log;
-}
-
-var highlightDiff = function(diff, element, callbacks) {
+this.highlightDiff = function(diff, element) {
 	if (!diff || diff == "")
 		return;
 
-	if (!callbacks)
-		callbacks = {};
 	var start = new Date().getTime();
 	element.className = "diff"
 	var content = diff.escapeHTML().replace(/\t/g, "    ");
@@ -255,9 +254,7 @@ var highlightDiff = function(diff, element, callbacks) {
 	finishContent();
 
 	// This takes about 7ms
-	element.innerHtml = finalContent;
-
-	// TODO: Replace this with a performance pref call
-	if (false)
-		Controller.log_("Total time:" + (new Date().getTime() - start));
+	element.innerHTML = finalContent;
+}
+// end DiffHighlighter 'namespace'
 }
