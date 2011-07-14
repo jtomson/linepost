@@ -1,20 +1,103 @@
+// for brew install
 require.paths.unshift('/usr/local/lib/node/');
-
-var express = require('express'),
-    connect = require('connect'),
-    sys = require('sys'),
-    exec = require('child_process').exec,
-    app = express.createServer();
 
 // ----------------
 // command for git bin
 var _git_bin = 'git';
 
-// repo name -> local repo dir map
-var _repos = {};
+// repo_name -> local repo dir map
+var _repos = {
+    'linepost': '/Users/james/sandbox/linepost'
+};
 
-_repos['linepost'] = '/Users/jtomson/sandbox/linepost';
+// sqlite db
+var _db = {};
+var _db_path = 'lps.sdb';
+
 // ----------------
+
+var express = require('express'),
+    connect = require('connect'),
+    sys = require('sys'),
+    fs = require('fs'),
+    exec = require('child_process').exec,
+    sqlite3 = require('sqlite3').verbose(),
+    app = express.createServer();
+
+//-------------------------
+// Initialization
+//-------------------------
+
+(function init() {
+    var is_new_db = false;
+    
+    try {
+        fs.lstatSync(_db_path);
+    }
+    catch (error) {
+        is_new_db = true;
+    }
+    
+    _db = new sqlite3.Database(_db_path, function(error) { if (error) { throw error; } });
+    _db.serialize(); // put in serial mode
+    
+    // calls are queued so we can start using the db even if we haven't completed open above
+    if (is_new_db) {
+        _db.run('CREATE TABLE comments( ' +
+                'id INTEGER PRIMARY KEY AUTOINCREMENT, ' +
+                'repo_name TEXT, ' +
+                'commit_sha TEXT, ' +
+                'file_idx INTEGER, ' +
+                'diff_row INTEGER, ' +
+                'comment_text TEXT );', function(error) {if (error) { throw error; } });
+    }
+
+}());
+
+var _isGoodSha = function(sha) {
+    var sha_matches = sha.match(/(?:\d|[a-f]){6,40}/i);
+    return (sha_matches !== null && sha_matches.length === 1);
+};
+
+// assumes comment is valid
+var _add_comment = function(comment, callback) {
+    _db.run( 'INSERT INTO comments VALUES(NULL, $repo_name, $commit_sha, $file_idx, $diff_row, $comment_text)',
+             { '$repo_name': comment.repo_name,
+               '$commit_sha': comment.commit_sha,
+               '$file_idx': comment.file_idx,
+               '$diff_row': comment.diff_row,
+               '$comment_text': comment.comment_text
+             },
+             callback);
+};
+
+// assume params are clean
+var _get_comments = function(repo_name, sha, callback) {
+    // FIXME stores in memory so assuming not a whole lot of comments
+    _db.all( 'SELECT * from comments WHERE repo_name = $repo_name AND commit_sha LIKE $commit_sha || "%"',
+             { '$repo_name': repo_name,
+               '$commit_sha': sha },
+             function(error, rows) { 
+                 if (error) { throw error; }
+                 callback(rows);
+             });
+};
+
+// Testing
+/*
+(function(){
+    _add_comment( {
+        'repo_name': 'linepost',
+        'commit_sha': 'ae12356677',
+        'file_idx': '1',
+        'diff_row': '2',
+        'comment_text': '"Hey there guy"'
+    },
+    function(error) { if(error) { throw error; } });
+    
+    _get_comments('linepost', 'ae12', function(rows) {console.log(sys.inspect(rows));});
+}());
+*/
 
 var _api_sendError = function(error_code, error_msg, res) {
     var error_stringified = JSON.stringify({'error': error_msg});
@@ -25,7 +108,7 @@ var _api_sendError = function(error_code, error_msg, res) {
     res.write(error_stringified);
     res.end();
     console.log('sent api error code: ' + error_code + ', error: ' + error_stringified );
-}
+};
 
 // TODO - nicer 404 pages etc
 var _content_sendError = function(error_code, error_msg, res) {
@@ -35,7 +118,7 @@ var _content_sendError = function(error_code, error_msg, res) {
     res.write(error_msg);
     res.end();
     console.log('sent content error code: ' + error_code + ', error: ' + error_msg );
-}
+};
 
 var _api_sendGitShow = function(repo_dir_path, sha, res) {
     // SHA \01
@@ -53,13 +136,13 @@ var _api_sendGitShow = function(repo_dir_path, sha, res) {
               else if (stderr) {
                   _api_sendError(500, 'Error running git show - has stderr: ' + stderr, res);
               }
-              else if (stdout.length == 0) {
+              else if (stdout.length === 0) {
                   _api_sendError(500, 'Error running git show - no output');
               }
               else {
                   var split_output_array = stdout.split('\01');
                   
-                  if (split_output_array.length != 5) {
+                  if (split_output_array.length !== 5) {
                       _api_sendError(500, 'Error running git show - bad output: ' + stdout, res);
                   }
                   else {
@@ -79,7 +162,7 @@ var _api_sendGitShow = function(repo_dir_path, sha, res) {
                   }
               }
           });
-}
+};
 
 var _content_sendCommitPage = function(reponame, sha, res) {
     // TODO render template, include ajax-pull to api
@@ -87,12 +170,7 @@ var _content_sendCommitPage = function(reponame, sha, res) {
         locals: {'sha': sha,
                  'repo': reponame },
         layout: false});
-}
-
-var _isGoodSha = function(sha) {
-    var sha_matches = sha.match(/(?:\d|[a-f]){6,40}/i);
-    return (sha_matches !== null && sha_matches.length == 1);
-}
+};
 
 // ----- App middleware + routing
 app.use(connect.logger());
