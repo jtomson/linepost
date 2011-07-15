@@ -43,6 +43,7 @@ var express = require('express'),
     
     // calls are queued so we can start using the db even if we haven't completed open above
     if (is_new_db) {
+        // FIXME - not optimized at all, just blatted for the time being
         _db.run('CREATE TABLE comments( ' +
                 'id INTEGER PRIMARY KEY AUTOINCREMENT, ' +
                 'repo_name TEXT, ' +
@@ -83,6 +84,7 @@ var _get_comments = function(repo_name, sha, callback) {
              });
 };
 
+
 // Testing
 /*
 (function(){
@@ -120,15 +122,29 @@ var _content_sendError = function(error_code, error_msg, res) {
     console.log('sent content error code: ' + error_code + ', error: ' + error_msg );
 };
 
-var _api_sendGitShow = function(repo_dir_path, sha, res) {
+var _api_sendCommitComments = function(repo_name, sha, res) {
+    
+    _get_comments(repo_name, sha, function(comments) {
+        var stringified_comments = JSON.stringify(comments);
+        
+        res.writeHead(200, {'Content-Length': stringified_comments.length,
+                          'Content-Type': 'application/json'});
+        res.write(stringified_comments);
+        res.end();
+        
+        console.log('sent ' + comments.length + ' comments');
+    });
+};
+
+var _api_sendGitShow = function(repo_name, sha, res) {
     // SHA \01
     // Author Name <Author Email>\01
     // Subject \n Body \01
     // Author Date \01
-    // DIFF
+    // DIFF EOF
     var format_str = '--pretty=format:"%H\01%an <%ae>\01%s\n%b\01%at\01"';
     exec( _git_bin + ' show ' + format_str + ' ' + sha,
-          {cwd: repo_dir_path},
+          {cwd: _repos[repo_name]},
           function(error, stdout, stderr) {
               if (error) {
                   _api_sendError(500, 'Error running git show: ' + error, res);
@@ -187,7 +203,24 @@ app.get('/api/git-show/:repo/:sha', function(req, res) {
         _api_sendError(404, 'undefined repo: "' + repo + '"', res);
     }
     else if (_isGoodSha(sha)) {
-        _api_sendGitShow(_repos[req.params.repo], req.params.sha, res);
+        _api_sendGitShow(repo, sha, res);
+    }
+    else {
+        _api_sendError(404, 'bad sha: "' + sha + '"', res);
+    }
+});
+
+app.get('/api/comments/:repo/:sha', function(req, res) {
+    var repo = req.params.repo;
+    var sha = req.params.sha;
+    
+    // Do we have this repo name mapped to a local dir?
+    if (_repos[repo] === undefined) {
+        // TODO - nicer 404
+        _api_sendError(404, 'undefined repo: "' + repo + '"', res);
+    }
+    else if (_isGoodSha(sha)) {
+        _api_sendCommitComments(repo, sha, res);
     }
     else {
         _api_sendError(404, 'bad sha: "' + sha + '"', res);
