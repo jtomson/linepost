@@ -13,14 +13,14 @@
         :javascript
           function getCommitJSON() {
             $.getJSON("/api/git-show/#{repo}/#{sha}", function(data) {
-              $('#sha').get(0).innerHTML = data.sha;
-              $('#author-name-and-email').get(0).innerHTML = data['author-name-and-email'];
-              $('#subject-and-body').get(0).innerHTML = data['subject-and-body'];
-              $('#author-date').get(0).innerHTML = data['author-date'];
+              $('#sha').html( data.sha );
+              $('#author-name-and-email').html( data['author-name-and-email'] );
+              $('#subject-and-body').html( data['subject-and-body'] );
+              $('#author-date').html( data['author-date'] );
               var highlighter = new DiffHighlighter.highlighter();
               highlighter.highlightDiff(data.diff, $('#diff-content').get(0));
             })
-            .error(function() {$('#diff-content').get(0).innerHTML = 'Error loading commit'});
+            .error(function(qXHR, textStatus, errorThrown) {$('#diff-content').html( 'Error loading commit: ' + errorThrown )} );
           }
 
     %body{ onload: "getCommitJSON()" }
