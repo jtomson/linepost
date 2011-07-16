@@ -4,13 +4,14 @@
     width: 920px;
 }
 .diff .file {
-	margin: 10px;
+/*  margin: 10px;*/
 	padding: 10px;
-	-webkit-border-radius: 10px;
+/*  -webkit-border-radius: 10px;*/
 	border: 1px solid #CCC;
-	-webkit-box-shadow: 1px 1px 2px #DDD;
+    -webkit-box-shadow: 1px 1px 2px #DDD;
 	overflow-x: auto;
 	overflow-y: hidden;
+	margin-bottom: 12px;
 }
 
 .diff table {
