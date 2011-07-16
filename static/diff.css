@@ -3,6 +3,7 @@
     margin: 0 auto;
     width: 920px;
 }
+
 .diff .file {
 /*  margin: 10px;*/
 	padding: 10px;
@@ -23,6 +24,9 @@
 	white-space: pre;
 }
 
+.highlight {
+    background-color: yellow;
+}
 
 .diff .fileHeader {
 	margin-top: -5px;
@@ -80,10 +84,20 @@
   color: #B00;
 }
 
+.diff .delline .highlight {
+    color: yellow;
+}
+
+.diff .addline .highlight {
+  background-color: yellow;
+  color: yellow;
+}
+
 .diff .addline {
   background-color: #DFD;
   color: #080;
 }
+
 
 .diff .whitespace {
 	background-color: rgba(255,0,0,0.5);

@@ -12,3 +12,7 @@
 	padding: 12px;
 	margin-bottom: 12px;
 }
+
+.info-block #subject-and-body {
+    color: black;
+}

@@ -13,28 +13,37 @@
         :javascript
           function getCommitJSON() {
             $.getJSON("/api/git-show/#{repo}/#{sha}", function(data) {
-              $('#sha').html( 'commit: ' + data.sha );
-              $('#author-name-and-email').html( 'author: ' + data['author-name-and-email'] );
+              $('.loading').hide();
+              $('.info-block').fadeIn(500);
               
+              $('#sha').append( data.sha );
+              $('#author-name-and-email').append( data['author-name-and-email'] );
               
               var showdown = new Showdown.converter();
-              $('#subject-and-body').html( 'message: ' + showdown.makeHtml(data['subject-and-body']) );
+              $('#subject-and-body').append( showdown.makeHtml(data['subject-and-body']) );
               
-              
-              $('#author-date').html( 'author date: ' + new Date( data['author-date'] * 1000 ).toLocaleString() );
+              $('#author-date').append( new Date( data['author-date'] * 1000 ).toLocaleString() );
               
               var highlighter = new DiffHighlighter.highlighter();
               highlighter.highlightDiff(data.diff, $('#diff-content').get(0));
+              
+              $('table tr').children().hover( function() {
+                  $(this).toggleClass('highlight');
+              });
+
             })
-            .error(function(qXHR, textStatus, errorThrown) {$('#diff-content').html( 'Error loading commit: ' + errorThrown )} );
+            .error(function(qXHR, textStatus, errorThrown) {$('.loading').html( 'error loading commit: ' + errorThrown )} );
           }
 
     %body{ onload: "getCommitJSON()" }
+        .loading &= "loading..."
         .wrap
-            .info-block
-                #sha
-                #author-name-and-email
-                #author-date
-                #subject-and-body
+            .info-block{style: 'display: none'}
+                    #sha                   &= 'commit:      '
+                    #author-name-and-email &= 'author:      '
+                    #author-date           &= 'author date: '
+                    %span &= 'message:'
+                    #subject-and-body
+                    
             .diff-block
-                #diff-content &= "loading..."
+                #diff-content
