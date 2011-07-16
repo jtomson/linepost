@@ -215,14 +215,14 @@ this.highlightDiff = function(diff, element) {
 			diffContent += "<tr>";
 			diffContent += "<td class='lineno'>" + " " + "</td>";
 			diffContent += "<td class='lineno'>" + ++hunk_start_line_2 + "</td>";
-			diffContent += "<td " + sindex + "class='addline'>" + l + "</td>";
+			diffContent += "<td " + sindex + "class='line addline'>" + l + "</td>";
 			diffContent += "</tr>";
 		}
 		else if (firstChar == "-") {
 			diffContent += "<tr>";
 			diffContent += "<td class='lineno'>" + ++hunk_start_line_1 + "</td>";
 			diffContent += "<td class='lineno'>" + " " + "</td>";
-			diffContent += "<td " + sindex + "class='delline'>" + l + "</td>";
+			diffContent += "<td " + sindex + "class='line delline'>" + l + "</td>";
 			diffContent += "</tr>";
 		}
 		else if (firstChar == "@") {
@@ -237,14 +237,14 @@ this.highlightDiff = function(diff, element) {
 			diffContent += "<tr>";
 			diffContent += "<td class='lineno'>" + "..." + "</td>";
 			diffContent += "<td class='lineno'>" + "..." + "</td>";
-			diffContent += "<td " + sindex + "class='hunkheader'>" + l + "</td>";
+			diffContent += "<td " + sindex + "class='line hunkheader'>" + l + "</td>";
 			diffContent += "</tr>";
 		}
 		else if (firstChar == " ") {
 			diffContent += "<tr>";
 			diffContent += "<td class='lineno'>" + ++hunk_start_line_1 + "</td>";
 			diffContent += "<td class='lineno'>" + ++hunk_start_line_2 + "</td>";
-			diffContent += "<td " + sindex + "class='noopline'>" + l + "</td>";
+			diffContent += "<td " + sindex + "class='line noopline'>" + l + "</td>";
 			diffContent += "</tr>";
 		}
 		

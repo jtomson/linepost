@@ -24,10 +24,6 @@
 	white-space: pre;
 }
 
-.highlight {
-    background-color: yellow;
-}
-
 .diff .fileHeader {
 	margin-top: -5px;
 	padding-bottom: 1px;
@@ -78,19 +74,14 @@
   color: #bbb;
 }
 
-
 .diff .delline {
   background-color: #FEE;
   color: #B00;
 }
 
-.diff .delline .highlight {
-    color: yellow;
-}
-
-.diff .addline .highlight {
-  background-color: yellow;
-  color: yellow;
+.diff .line:hover {
+    background-color: #DBA5CF;
+    color: #B5008D;
 }
 
 .diff .addline {

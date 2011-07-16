@@ -27,12 +27,9 @@
               var highlighter = new DiffHighlighter.highlighter();
               highlighter.highlightDiff(data.diff, $('#diff-content').get(0));
               
-              $('table tr').children().hover( function() {
-                  $(this).toggleClass('highlight');
-              });
-
-            })
-            .error(function(qXHR, textStatus, errorThrown) {$('.loading').html( 'error loading commit: ' + errorThrown )} );
+            }).error(function(qXHR, textStatus, errorThrown) {
+                $('.loading').html( 'error loading commit: ' + errorThrown );
+            });
           }
 
     %body{ onload: "getCommitJSON()" }
