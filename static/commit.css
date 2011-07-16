@@ -1,3 +1,12 @@
-#sha {
-    font-size: 2.0em;
+.info-block {
+    font-size: 1.0em;
+    background-color: #ECECEC;
+    color: darkgrey;
+    line-height: 150%;
+    width: 920px;
+    margin: auto;
+    border: 1px solid;
+    white-space: pre;
+	font-family: Menlo, Monaco;
+	padding: 4px;
 }

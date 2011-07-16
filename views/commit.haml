@@ -13,10 +13,16 @@
         :javascript
           function getCommitJSON() {
             $.getJSON("/api/git-show/#{repo}/#{sha}", function(data) {
-              $('#sha').html( data.sha );
-              $('#author-name-and-email').html( data['author-name-and-email'] );
-              $('#subject-and-body').html( data['subject-and-body'] );
-              $('#author-date').html( data['author-date'] );
+              $('#sha').html( 'commit: ' + data.sha );
+              $('#author-name-and-email').html( 'author: ' + data['author-name-and-email'] );
+              
+              
+              var showdown = new Showdown.converter();
+              $('#subject-and-body').html( 'message: ' + showdown.makeHtml(data['subject-and-body']) );
+              
+              
+              $('#author-date').html( 'author date: ' + new Date( data['author-date'] * 1000 ).toLocaleString() );
+              
               var highlighter = new DiffHighlighter.highlighter();
               highlighter.highlightDiff(data.diff, $('#diff-content').get(0));
             })
@@ -25,8 +31,10 @@
 
     %body{ onload: "getCommitJSON()" }
         .wrap
-            #sha
-            #author-name-and-email
-            #author-date
-            #subject-and-body
-            #diff-content &= "loading..."
+            .info-block
+                #sha
+                #author-name-and-email
+                #author-date
+                #subject-and-body
+            .diff-block
+                #diff-content &= "loading..."
