@@ -27,6 +27,25 @@
               var highlighter = new DiffHighlighter.highlighter();
               highlighter.highlightDiff(data.diff, $('#diff-content').get(0));
               
+              // kind of hacky but done w/ trying to get a div to float outside of the table
+              // next to the selected row to click for the time being
+              $('.diff .line').dblclick(function() {
+                 var file_idx = $(this).closest('.file').index();
+                 var row_idx = $(this).parent().index();
+                 
+                 alert('You double-clicked row: ' + row_idx + ' in file: ' + file_idx);
+                 
+                 // todo: add comment form block
+                 
+                 // clear any text selection after the double-click
+                 if (window.getSelection) {
+                     window.getSelection().removeAllRanges();
+                 }
+                 else if (document.selection) {
+                     document.selection.empty();
+                 }
+              });
+              
             }).error(function(qXHR, textStatus, errorThrown) {
                 $('.loading').html( 'error loading commit: ' + errorThrown );
             });

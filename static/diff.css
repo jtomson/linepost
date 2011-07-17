@@ -13,6 +13,7 @@
 	overflow-x: auto;
 	overflow-y: hidden;
 	margin-bottom: 12px;
+	position: relative;
 }
 
 .diff table {
@@ -80,15 +81,14 @@
 }
 
 .diff .line:hover {
-    background-color: #DBA5CF;
-    color: #B5008D;
+    background-color: #D9C1D2;
+    color: #360C38;
 }
 
 .diff .addline {
   background-color: #DFD;
   color: #080;
 }
-
 
 .diff .whitespace {
 	background-color: rgba(255,0,0,0.5);
