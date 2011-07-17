@@ -1,7 +1,7 @@
 .diff {
     font-size: 14px;
     margin: 0 auto;
-    width: 920px;
+    width: 1024px;
 }
 
 .diff .file {
@@ -80,7 +80,7 @@
   color: #B00;
 }
 
-.diff .line:hover {
+.diff .commentable:hover {
     background-color: #D9C1D2;
     color: #360C38;
 }

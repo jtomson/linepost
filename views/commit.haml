@@ -11,44 +11,49 @@
         %script{type: "text/javascript", src: "/showdown.js"}
         
         :javascript
-          function getCommitJSON() {
-            $.getJSON("/api/git-show/#{repo}/#{sha}", function(data) {
-              $('.loading').hide();
-              $('.info-block').fadeIn(500);
-              
-              $('#sha').append( data.sha );
-              $('#author-name-and-email').append( data['author-name-and-email'] );
-              
-              var showdown = new Showdown.converter();
-              $('#subject-and-body').append( showdown.makeHtml(data['subject-and-body']) );
-              
-              $('#author-date').append( new Date( data['author-date'] * 1000 ).toLocaleString() );
-              
-              var highlighter = new DiffHighlighter.highlighter();
-              highlighter.highlightDiff(data.diff, $('#diff-content').get(0));
-              
-              // kind of hacky but done w/ trying to get a div to float outside of the table
-              // next to the selected row to click for the time being
-              $('.diff .line').dblclick(function() {
-                 var file_idx = $(this).closest('.file').index();
-                 var row_idx = $(this).parent().index();
-                 
-                 alert('You double-clicked row: ' + row_idx + ' in file: ' + file_idx);
-                 
-                 // todo: add comment form block
-                 
-                 // clear any text selection after the double-click
-                 if (window.getSelection) {
-                     window.getSelection().removeAllRanges();
-                 }
-                 else if (document.selection) {
-                     document.selection.empty();
-                 }
-              });
-              
-            }).error(function(qXHR, textStatus, errorThrown) {
-                $('.loading').html( 'error loading commit: ' + errorThrown );
-            });
+            function getCommitJSON() {
+                $.getJSON("/api/git-show/#{repo}/#{sha}", function(data) {
+                  $('.loading').hide();
+                  
+                  // populate info-block
+                  $('.info-block').fadeIn(650);
+          
+                  $('#sha').append( data.sha );
+                  $('#author-name-and-email').append( data['author-name-and-email'] );
+          
+                  var showdown = new Showdown.converter();
+                  $('#subject-and-body').append( showdown.makeHtml(data['subject-and-body']) );
+          
+                  $('#author-date').append( new Date( data['author-date'] * 1000 ).toLocaleString() );
+          
+                  // markup diff tables
+                  var highlighter = new DiffHighlighter.highlighter();
+                  highlighter.highlightDiff(data.diff, $('#diff-content').get(0));
+          
+                  // kind of hacky but done w/ trying to get a div to float outside of the table
+                  // next to the selected row to click for the time being
+                  $('.diff .commentable').dblclick(function() {
+                     var file = $(this).closest('.file').get(0);
+                     var file_idx = $(this).closest('.file').index();
+                     var row_idx = $('#' + file.id + ' .commentable').index(this);
+             
+                     alert('You double-clicked row: ' + row_idx + ' in file: ' + file_idx + ' with id: ' + file.id);
+             
+                     // todo: add comment form block
+                     $(this).closest('tr').after('<tr><td></td><td></td><td>comment: foo</td></tr>');
+             
+                     // clear any text selection after the double-click
+                     if (window.getSelection) {
+                         window.getSelection().removeAllRanges();
+                     }
+                     else if (document.selection) {
+                         document.selection.empty();
+                     }
+                  });
+          
+                }).error(function(qXHR, textStatus, errorThrown) {
+                    $('.loading').html( 'error loading commit: ' + errorThrown );
+                });
           }
 
     %body{ onload: "getCommitJSON()" }
