@@ -37,10 +37,15 @@
                      var file_idx = $(this).closest('.file').index();
                      var row_idx = $('#' + file.id + ' .commentable').index(this);
              
-                     alert('You double-clicked row: ' + row_idx + ' in file: ' + file_idx + ' with id: ' + file.id);
+                     // alert('You double-clicked row: ' + row_idx + ' in file: ' + file_idx + ' with id: ' + file.id);
              
-                     // todo: add comment form block
-                     $(this).closest('tr').after('<tr><td></td><td></td><td>comment: foo</td></tr>');
+                     // add comment form block
+                     var comment_form = ($('#templates .add-comment-form').clone()).remove();
+                     
+                     $(this).closest('tr').after(
+                         '<tr class="add-comment-row"><td class="stripe" colspan=2></td><td class="add-comment-cell"> '
+                         + comment_form.html()
+                         + '</td></tr>');
              
                      // clear any text selection after the double-click
                      if (window.getSelection) {
@@ -68,3 +73,14 @@
                     
             .diff-block
                 #diff-content
+        #templates{style: 'display: none'}
+            .add-comment-form
+                .form-container
+                    %form{action: "/#{repo}/#{sha}", method: 'put'}
+                        %textarea
+                        .button-container
+                            %button.cancel-button &= 'Discard'
+                            %button.submit-button &= 'Submit'
+                            %div{style: 'clear: both;'}
+                            
+                

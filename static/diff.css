@@ -94,6 +94,43 @@
 	background-color: rgba(255,0,0,0.5);
 }
 
+.add-comment-cell {
+    margin: 12px;
+    border: 1px solid lightgray;
+}
+
+.add-comment-cell .form-container {
+    margin: 12px;
+    line-height: 1.5em;
+    margin-right: auto;
+    width: 900px;
+    position: relative;
+}
+
+.add-comment-cell textarea {
+    width: 100%;
+    height: 100px;
+}
+
+.add-comment-cell .button-container {
+    width: 100%;
+    position: relative;
+}
+
+.add-comment-cell .cancel-button {
+    float: left;
+    font-size: 1.2em;
+}
+
+.add-comment-cell .submit-button {
+    float: right;
+    font-size: 1.2em;
+}
+
+.add-comment-row .stripe {
+    background-image: url('/stripe.png');
+    background-repeat: repeat-x repeat-y;
+}
 #CurrentHunk {
 	border-left: 5px solid black;
 }
