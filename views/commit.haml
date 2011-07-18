@@ -40,13 +40,26 @@
                      // alert('You double-clicked row: ' + row_idx + ' in file: ' + file_idx + ' with id: ' + file.id);
              
                      // add comment form block
-                     var comment_form = ($('#templates .add-comment-form').clone()).remove();
-                     
-                     $(this).closest('tr').after(
+                     var comment_form = $('#templates .add-comment-form');
+                     var target_row = $(this).closest('tr');
+                     target_row.after(
                          '<tr class="add-comment-row"><td class="stripe" colspan=2></td><td class="add-comment-cell"> '
                          + comment_form.html()
                          + '</td></tr>');
-             
+                     // $(target_row).next().hide().fadeIn(100);
+                     var comment_row = $(target_row).next();
+                     
+                     // hook up comment form buttons
+                     $('.cancel-button', comment_row).click( function() {
+                        $(comment_row).remove();
+                        return false; // don't reload page
+                     });
+                     
+                     $('.submit-button', comment_row).click( function() {
+                         $(comment_row).remove();
+                         return false; // don't reload page
+                      });
+                     
                      // clear any text selection after the double-click
                      if (window.getSelection) {
                          window.getSelection().removeAllRanges();
@@ -76,7 +89,7 @@
         #templates{style: 'display: none'}
             .add-comment-form
                 .form-container
-                    %form{action: "/#{repo}/#{sha}", method: 'put'}
+                    %form
                         %textarea
                         .button-container
                             %button.cancel-button &= 'Discard'
