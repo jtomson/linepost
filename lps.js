@@ -44,12 +44,14 @@ var express = require('express'),
     // calls are queued so we can start using the db even if we haven't completed open above
     if (is_new_db) {
         // FIXME - not optimized at all, just blatted for the time being
+        // TODO - date
         _db.run('CREATE TABLE comments( ' +
                 'id INTEGER PRIMARY KEY AUTOINCREMENT, ' +
                 'repo_name TEXT, ' +
                 'commit_sha TEXT, ' +
                 'file_idx INTEGER, ' +
                 'diff_row INTEGER, ' +
+                'timestamp INTEGER, ' +
                 'comment_text TEXT );', function(error) {if (error) { throw error; } });
     }
 
@@ -62,11 +64,12 @@ var _isGoodSha = function(sha) {
 
 // assumes comment is valid
 var _add_comment = function(comment, callback) {
-    _db.run( 'INSERT INTO comments VALUES(NULL, $repo_name, $commit_sha, $file_idx, $diff_row, $comment_text)',
+    _db.run( 'INSERT INTO comments VALUES(NULL, $repo_name, $commit_sha, $file_idx, $diff_row, $timestamp, $comment_text)',
              { '$repo_name': comment.repo_name,
                '$commit_sha': comment.commit_sha,
                '$file_idx': comment.file_idx,
                '$diff_row': comment.diff_row,
+               '$timestamp': comment.timestamp,
                '$comment_text': comment.comment_text
              },
              callback);
@@ -93,6 +96,7 @@ var _get_comments = function(repo_name, sha, callback) {
         'commit_sha': 'ae12356677',
         'file_idx': '1',
         'diff_row': '2',
+        'timestamp': new Date().getTime(),
         'comment_text': '"Hey there guy"'
     },
     function(error) { if(error) { throw error; } });
