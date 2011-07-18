@@ -46,19 +46,19 @@
                          '<tr class="add-comment-row"><td class="stripe" colspan=2></td><td class="add-comment-cell"> '
                          + comment_form.html()
                          + '</td></tr>');
-                     // $(target_row).next().hide().fadeIn(100);
+                     $(target_row).next().hide().fadeIn();
                      var comment_row = $(target_row).next();
                      
                      // hook up comment form buttons
                      $('.cancel-button', comment_row).click( function() {
-                        $(comment_row).remove();
+                        $(comment_row).fadeOut( function() { $(comment_row).remove() } );
                         return false; // don't reload page
                      });
                      
-                     $('.submit-button', comment_row).click( function() {
+                     /*$('.submit-button', comment_row).click( function() {
                          $(comment_row).remove();
                          return false; // don't reload page
-                      });
+                      });*/
                      
                      // clear any text selection after the double-click
                      if (window.getSelection) {
@@ -89,8 +89,8 @@
         #templates{style: 'display: none'}
             .add-comment-form
                 .form-container
-                    %form
-                        %textarea
+                    %form{action: "/#{repo}/#{sha}", method: "post"}
+                        %textarea{name: "comment_text"}
                         .button-container
                             %button.cancel-button &= 'Discard'
                             %button.submit-button &= 'Submit'

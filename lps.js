@@ -193,6 +193,8 @@ app.use(connect.logger());
 
 app.use(express.staticProvider(__dirname + '/static'));
 
+app.use(express.bodyDecoder());
+
 app.get('/api/git-show/:repo/:sha', function(req, res) {
     var repo = req.params.repo;
     var sha = req.params.sha;
@@ -242,6 +244,12 @@ app.get('/:repo/:sha', function(req, res) {
     else {
         _content_sendError(404, 'Bad sha: "' + sha + '"', res);
     }
+});
+
+app.post('/:repo/:sha', function(req, res) {
+    var reponame = req.params.repo;
+    var sha = req.params.sha;
+    console.log('got: ' + req.body.comment_text)
 });
 
 app.listen(3000);
