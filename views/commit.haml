@@ -12,23 +12,31 @@
         
         :javascript
             function getCommitJSON() {
-                $.getJSON("/api/git-show/#{repo}/#{sha}", function(data) {
+                $.getJSON("/#{repo}/#{sha}?format=json", function(data) {
                   $('.loading').hide();
                   
+                  if (!data.git_show) {
+                      // TODO show proper error
+                      $('.loading').html( 'error loading commit - empty git show' );
+                      return;
+                  }
+                  
+                  console.log(JSON.stringify(data.comments));
+
                   // populate info-block
                   $('.info-block').fadeIn(650);
           
-                  $('#sha').append( data.sha );
-                  $('#author-name-and-email').append( data['author-name-and-email'] );
+                  $('#sha').append( data.git_show.sha );
+                  $('#author-name-and-email').append( data.git_show['author-name-and-email'] );
           
                   var showdown = new Showdown.converter();
-                  $('#subject-and-body').append( showdown.makeHtml(data['subject-and-body']) );
+                  $('#subject-and-body').append( showdown.makeHtml(data.git_show['subject-and-body']) );
           
-                  $('#author-date').append( new Date( data['author-date'] * 1000 ).toLocaleString() );
+                  $('#author-date').append( new Date( data.git_show['author-date'] * 1000 ).toLocaleString() );
           
                   // markup diff tables
                   var highlighter = new DiffHighlighter.highlighter();
-                  highlighter.highlightDiff(data.diff, $('#diff-content').get(0));
+                  highlighter.highlightDiff(data.git_show.diff, $('#diff-content').get(0));
           
                   // kind of hacky but done w/ trying to get a div to float outside of the table
                   // next to the selected row to click for the time being

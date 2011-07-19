@@ -7,7 +7,7 @@ var _git_bin = 'git';
 
 // repo_name -> local repo dir map
 var _repos = {
-    'linepost': '/Users/jtomson/sandbox/linepost'
+    'linepost': '/Users/james/sandbox/linepost'
 };
 
 // sqlite db
@@ -81,9 +81,8 @@ var _get_comments = function(repo_name, sha, callback) {
     _db.all( 'SELECT * from comments WHERE repo_name = $repo_name AND commit_sha LIKE $commit_sha || "%"',
              { '$repo_name': repo_name,
                '$commit_sha': sha },
-             function(error, rows) { 
-                 if (error) { throw error; }
-                 callback(rows);
+             function(error, rows) {
+                 callback(error, rows);
              });
 };
 
@@ -93,7 +92,7 @@ var _get_comments = function(repo_name, sha, callback) {
 (function(){
     _add_comment( {
         'repo_name': 'linepost',
-        'commit_sha': 'ae12356677',
+        'commit_sha': 'a084bff88',
         'file_idx': '1',
         'diff_row': '2',
         'timestamp': new Date().getTime(),
@@ -101,7 +100,7 @@ var _get_comments = function(repo_name, sha, callback) {
     },
     function(error) { if(error) { throw error; } });
     
-    _get_comments('linepost', 'ae12', function(rows) {console.log(sys.inspect(rows));});
+    //_get_comments('linepost', 'ae12', function(rows) {console.log(sys.inspect(rows));});
 }());
 */
 
@@ -126,21 +125,7 @@ var _content_sendError = function(error_code, error_msg, res) {
     console.log('sent content error code: ' + error_code + ', error: ' + error_msg );
 };
 
-var _api_sendCommitComments = function(repo_name, sha, res) {
-    
-    _get_comments(repo_name, sha, function(comments) {
-        var stringified_comments = JSON.stringify(comments);
-        
-        res.writeHead(200, {'Content-Length': stringified_comments.length,
-                          'Content-Type': 'application/json'});
-        res.write(stringified_comments);
-        res.end();
-        
-        console.log('sent ' + comments.length + ' comments');
-    });
-};
-
-var _api_sendGitShow = function(repo_name, sha, res) {
+var _get_git_show = function(repo_name, sha, res, callback) {
     // SHA \01
     // Author Name <Author Email>\01
     // Subject \n Body \01
@@ -151,33 +136,29 @@ var _api_sendGitShow = function(repo_name, sha, res) {
           {cwd: _repos[repo_name]},
           function(error, stdout, stderr) {
               if (error) {
-                  _api_sendError(500, 'Error running git show: ' + error, res);
+                  callback( {status: 500, message: 'Error running git show: ' + error}, null );
               }
               else if (stderr) {
-                  _api_sendError(500, 'Error running git show - has stderr: ' + stderr, res);
+                  callback( {status: 500, message: 'Error running git show - has stderr: ' + stderr}, null );
               }
               else if (stdout.length === 0) {
-                  _api_sendError(500, 'Error running git show - no output');
+                  callback( {status: 500, message: 'Error running git show - no output'}, null);
               }
               else {
                   var split_output_array = stdout.split('\01');
                   
                   if (split_output_array.length !== 5) {
-                      _api_sendError(500, 'Error running git show - bad output: ' + stdout, res);
+                      callback( {status: 500, message: 'Error running git show - bad output: ' + stdout}, null );
                   }
                   else {
-                      var stringified_commit = JSON.stringify({
+                      var response = {
                             'sha': split_output_array[0],
                             'author-name-and-email': split_output_array[1],
                             'subject-and-body': split_output_array[2],
                             'author-date': split_output_array[3],
                             'diff': split_output_array[4]
-                        });
-                        
-                      res.writeHead(200, {'Content-Length': stringified_commit.length,
-                                          'Content-Type': 'application/json'});
-                      res.write(stringified_commit);
-                      res.end();
+                      }
+                      callback(null, response);
                       console.log('sent good output from git-show');
                   }
               }
@@ -199,51 +180,76 @@ app.use(express.staticProvider(__dirname + '/static'));
 
 app.use(express.bodyDecoder());
 
-app.get('/api/git-show/:repo/:sha', function(req, res) {
-    var repo = req.params.repo;
-    var sha = req.params.sha;
-    
-    // Do we have this repo name mapped to a local dir?
-    if (_repos[repo] === undefined) {
-        // TODO - nicer 404
-        _api_sendError(404, 'undefined repo: "' + repo + '"', res);
-    }
-    else if (_isGoodSha(sha)) {
-        _api_sendGitShow(repo, sha, res);
-    }
-    else {
-        _api_sendError(404, 'bad sha: "' + sha + '"', res);
-    }
-});
+// TODO - Responder class with sendError() and sendData()
+// and a factory method responderForFormat(format)
 
-app.get('/api/comments/:repo/:sha', function(req, res) {
-    var repo = req.params.repo;
-    var sha = req.params.sha;
-    
-    // Do we have this repo name mapped to a local dir?
-    if (_repos[repo] === undefined) {
-        // TODO - nicer 404
-        _api_sendError(404, 'undefined repo: "' + repo + '"', res);
+var _format_responders = {
+    'html': function(repo_name, sha, res) {
+        res.render('commit.haml', {
+            locals: {
+                'sha': sha,
+                'repo': repo_name 
+            },
+            layout: false
+        });
+    },
+    'json': function(repo_name, sha, res) {
+        var git_show_and_comments = {};
+        
+        _get_git_show(repo_name, sha, res, function(error, result) {
+            if (error) {
+                _api_sendError(error.status, error.message, res);
+                return;
+            }
+            
+            git_show_and_comments.git_show = result;
+
+            _get_comments(repo_name, sha, function(error, result) {
+                if (error) {
+                    _api_sendError(error.status, error.message, res);
+                    return;
+                }
+                git_show_and_comments.comments = result;
+                var stringified_response = JSON.stringify(git_show_and_comments);
+                res.writeHead(200, {'Content-Length': stringified_response.length,
+                                    'Content-Type': 'application/json'});
+                res.write(stringified_response);
+                res.end();
+            });
+        });
     }
-    else if (_isGoodSha(sha)) {
-        _api_sendCommitComments(repo, sha, res);
-    }
-    else {
-        _api_sendError(404, 'bad sha: "' + sha + '"', res);
-    }
-});
+};
+
+var _format_error_responders = {
+    'html': _content_sendError,
+    'json': _api_sendError
+};
 
 app.get('/:repo/:sha', function(req, res) {
-    var reponame = req.params.repo;
+    var repo_name = req.params.repo;
     var sha = req.params.sha;
+    var format = req.query.format || 'html';
     
     // Do we have this repo name mapped to a local dir?
-    if (_repos[reponame] === undefined) {
-        // TODO - nicer 404
-        _content_sendError(404, 'Undefined repo: "' + repo + '"', res);
+    if (_repos[repo_name] === undefined) {
+        var msg = 'Undefined repo: "' + repo_name + '"';
+        try {
+            _format_error_responders[format](404, msg, res);
+        }
+        catch (e1) {
+            _content_sendError(415, 'Unknown format: ' + format, res);
+        }
+        return;
     }
-    else if (_isGoodSha(sha)) {
-        _content_sendCommitPage(reponame, req.params.sha, res);
+    
+    if (_isGoodSha(sha)) {
+        try {
+            _format_responders[format](repo_name, sha, res);
+        }
+        catch (e2) {
+            _content_sendError(415, 'Unknown format: ' + format, res);
+        }
+        return;
     }
     else {
         _content_sendError(404, 'Bad sha: "' + sha + '"', res);
@@ -253,7 +259,7 @@ app.get('/:repo/:sha', function(req, res) {
 app.post('/:repo/:sha', function(req, res) {
     var reponame = req.params.repo;
     var sha = req.params.sha;
-    console.log('got: ' + req.body.comment_text)
+    console.log('got: ' + req.body.comment_text);
 });
 
 app.listen(3000);
