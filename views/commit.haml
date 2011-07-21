@@ -5,12 +5,85 @@
         
         %link{rel: "stylesheet", type: "text/css", href: "/commit.css"}
         %link{rel: "stylesheet", type: "text/css", href: "/diff.css"}
+        %link{rel: "stylesheet", type: "text/css", href: "/comment.css"}
         
         %script{type: "text/javascript", src: "http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"}
         %script{type: "text/javascript", src: "/diffHighlighter.js"}
         %script{type: "text/javascript", src: "/showdown.js"}
         
         :javascript
+            function onCommentSubmitClicked() {
+                var comment_row = $(this).closest('.add-comment-row');
+                var comment_text = $('textarea[name="comment_text"]', comment_row).val();
+                if (comment_text.length === 0) {
+                    // flash red or something? maybe better to disable this button
+                    // until there's text
+                    return false;
+                }
+                
+                var form_data = {
+                    'file_idx': comment_row.attr('file_idx'),
+                    'row_idx': comment_row.attr('row_idx'),
+                    'comment_text': comment_text
+                };
+                
+                $.post('/#{repo}/#{sha}', form_data, function() {
+                    // turn this into a static comment row
+                    var cell = $('.add-comment-cell', comment_row);
+                    var showdown = new Showdown.converter();
+                    $(cell).html( '<div class="comment-wrapper">' + showdown.makeHtml(comment_text) + '</div>');
+                    $(cell).attr('class', 'comment');
+                    $(comment_row).attr('class', 'comment-row');
+                }).error(function() {
+                    alert('problem submitting comment');
+                });
+                
+                return false;
+            }
+            
+            function addCommentFormRow() {
+                var file = $(this).closest('.file').get(0);
+                var file_idx = $(file).index();
+                var row_idx = $('#' + file.id + ' .commentable').index(this);
+                var comment_form = $('#templates .add-comment-form');
+                var target_row = $(this).closest('tr');
+                
+                $(target_row).after('<tr class="add-comment-row" file_idx="'
+                                    + file_idx
+                                    + '" row_idx="'
+                                    + row_idx 
+                                    + '"><td class="stripe" colspan=2></td><td class="add-comment-cell">'
+                                    + comment_form.html()
+                                    + '</td></tr>');
+                
+                $(target_row).next().hide().fadeIn();
+                var comment_row = $(target_row).next();
+
+                $('form', comment_row).submit(function() {
+                    // disable default submit behavior w/ page refresh
+                    return false;
+                });
+                
+                // hook up comment form buttons
+                $('.cancel-button', comment_row).click(function() {
+                    $(comment_row).fadeOut(function() {
+                        $(comment_row).remove()
+                    });
+                    return false;
+                    // don't reload page
+                });
+
+                $('.submit-button', comment_row).click( onCommentSubmitClicked );
+
+                // clear any text selection after the double-click
+                if (window.getSelection) {
+                    window.getSelection().removeAllRanges();
+                }
+                else if (document.selection) {
+                    document.selection.empty();
+                }
+            }
+            
             function getCommitJSON() {
                 $.getJSON("/#{repo}/#{sha}?format=json", function(data) {
                   $('.loading').hide();
@@ -38,44 +111,8 @@
                   var highlighter = new DiffHighlighter.highlighter();
                   highlighter.highlightDiff(data.git_show.diff, $('#diff-content').get(0));
           
-                  // kind of hacky but done w/ trying to get a div to float outside of the table
-                  // next to the selected row to click for the time being
-                  $('.diff .commentable').dblclick(function() {
-                     var file = $(this).closest('.file').get(0);
-                     var file_idx = $(this).closest('.file').index();
-                     var row_idx = $('#' + file.id + ' .commentable').index(this);
-             
-                     // alert('You double-clicked row: ' + row_idx + ' in file: ' + file_idx + ' with id: ' + file.id);
-             
-                     // add comment form block
-                     var comment_form = $('#templates .add-comment-form');
-                     var target_row = $(this).closest('tr');
-                     target_row.after(
-                         '<tr class="add-comment-row"><td class="stripe" colspan=2></td><td class="add-comment-cell"> '
-                         + comment_form.html()
-                         + '</td></tr>');
-                     $(target_row).next().hide().fadeIn();
-                     var comment_row = $(target_row).next();
-                     
-                     // hook up comment form buttons
-                     $('.cancel-button', comment_row).click( function() {
-                        $(comment_row).fadeOut( function() { $(comment_row).remove() } );
-                        return false; // don't reload page
-                     });
-                     
-                     /*$('.submit-button', comment_row).click( function() {
-                         $(comment_row).remove();
-                         return false; // don't reload page
-                      });*/
-                     
-                     // clear any text selection after the double-click
-                     if (window.getSelection) {
-                         window.getSelection().removeAllRanges();
-                     }
-                     else if (document.selection) {
-                         document.selection.empty();
-                     }
-                  });
+                  // bind double-clicking a row - add a form comment
+                  $('.diff .commentable').dblclick(addCommentFormRow);
           
                 }).error(function(qXHR, textStatus, errorThrown) {
                     $('.loading').html( 'error loading commit: ' + errorThrown );
@@ -97,7 +134,7 @@
         #templates{style: 'display: none'}
             .add-comment-form
                 .form-container
-                    %form{action: "/#{repo}/#{sha}", method: "post"}
+                    %form{action: "", method: "post"}
                         %textarea{name: "comment_text"}
                         .button-container
                             %button.cancel-button &= 'Discard'

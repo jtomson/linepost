@@ -259,7 +259,9 @@ app.get('/:repo/:sha', function(req, res) {
 app.post('/:repo/:sha', function(req, res) {
     var reponame = req.params.repo;
     var sha = req.params.sha;
-    console.log('got: ' + req.body.comment_text);
+    console.log('got: ' + sys.inspect(req.body));
+    res.writeHead(200);
+    res.end();
 });
 
 app.listen(3000);
