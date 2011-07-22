@@ -13,27 +13,26 @@
         
         :javascript
             function onCommentSubmitClicked() {
-                var comment_row = $(this).closest('.add-comment-row');
-                var comment_text = $('textarea[name="comment_text"]', comment_row).val();
+                var add_comment_row = $(this).closest('.add-comment-row');
+                var comment_text = $('textarea[name="comment_text"]', add_comment_row).val();
                 if (comment_text.length === 0) {
                     // flash red or something? maybe better to disable this button
                     // until there's text
                     return false;
                 }
                 
-                var form_data = {
-                    'file_idx': comment_row.attr('file_idx'),
-                    'row_idx': comment_row.attr('row_idx'),
-                    'comment_text': comment_text
+                var comment = {
+                    'file_idx': add_comment_row.attr('file_idx'),
+                    'row_idx': add_comment_row.attr('row_idx'),
+                    'comment_text': comment_text,
                 };
                 
-                $.post('/#{repo}/#{sha}', form_data, function() {
-                    // turn this into a static comment row
-                    var cell = $('.add-comment-cell', comment_row);
-                    var showdown = new Showdown.converter();
-                    $(cell).html( '<div class="comment-wrapper">' + showdown.makeHtml(comment_text) + '</div>');
-                    $(cell).attr('class', 'comment');
-                    $(comment_row).attr('class', 'comment-row');
+                $.post('/#{repo}/#{sha}', comment, function() {
+                    $(add_comment_row).remove();
+                    
+                    // FIXME - fake ID
+                    insertComments([comment]);
+                    
                 }).error(function() {
                     alert('problem submitting comment');
                 });
@@ -84,6 +83,28 @@
                 }
             }
             
+            function insertComments(comments) {
+                var showdown = new Showdown.converter();
+
+                // FIXME - handle order of multiple-comment idxs correctly (sort by id descending?)
+                $.each(comments, function(idx, comment) {
+                    var file = $('#file_index_' + comment.file_idx);
+                    var target_row = $('.commentable', file).eq(comment.diff_row).parent();
+                    
+                    if (!file || !target_row) {
+                        alert( 'bad comment' );
+                        return;
+                    }
+                    
+                    $(target_row).after(
+                        '<tr class="comment-row"><td class="stripe" colspan=2></td><td class="comment" id="comment_id_' + comment.id + '"></td></tr>'
+                    );
+                    
+                    var cell = $('#comment_id_' + comment.id);
+                    $(cell).html( '<div class="comment-wrapper">' + showdown.makeHtml(comment.comment_text) + '</div>');
+                });
+            }
+            
             function getCommitJSON() {
                 $.getJSON("/#{repo}/#{sha}?format=json", function(data) {
                   $('.loading').hide();
@@ -94,8 +115,6 @@
                       return;
                   }
                   
-                  console.log(JSON.stringify(data.comments));
-
                   // populate info-block
                   $('.info-block').fadeIn(650);
           
@@ -113,6 +132,9 @@
           
                   // bind double-clicking a row - add a form comment
                   $('.diff .commentable').dblclick(addCommentFormRow);
+                  
+                  // add existing comments to the diff rows
+                  insertComments(data.comments);
           
                 }).error(function(qXHR, textStatus, errorThrown) {
                     $('.loading').html( 'error loading commit: ' + errorThrown );

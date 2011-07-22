@@ -257,11 +257,31 @@ app.get('/:repo/:sha', function(req, res) {
 });
 
 app.post('/:repo/:sha', function(req, res) {
-    var reponame = req.params.repo;
+    var repo_name = req.params.repo;
     var sha = req.params.sha;
     console.log('got: ' + sys.inspect(req.body));
-    res.writeHead(200);
-    res.end();
+    
+    // TODO - validate vals?
+    var comment = {
+        comment_text: req.body.comment_text,
+        diff_row: req.body.row_idx,
+        file_idx: req.body.file_idx,
+        commit_sha: sha,
+        repo_name: repo_name,
+        timestamp: new Date().getTime()
+    };
+    
+    _add_comment(comment, function(error) {
+        if (error) {
+            _api_sendError(500, error, res);
+        }
+        else {
+            res.writeHead(200);
+            res.end();
+        }
+    });
+    
+    
 });
 
 app.listen(3000);
