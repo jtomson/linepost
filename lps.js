@@ -50,7 +50,7 @@ var express = require('express'),
                 'repo_name TEXT, ' +
                 'commit_sha TEXT, ' +
                 'file_idx INTEGER, ' +
-                'diff_row INTEGER, ' +
+                'row_idx INTEGER, ' +
                 'timestamp INTEGER, ' +
                 'comment_text TEXT );', function(error) {if (error) { throw error; } });
     }
@@ -64,11 +64,11 @@ var _isGoodSha = function(sha) {
 
 // assumes comment is valid
 var _add_comment = function(comment, callback) {
-    _db.run( 'INSERT INTO comments VALUES(NULL, $repo_name, $commit_sha, $file_idx, $diff_row, $timestamp, $comment_text)',
+    _db.run( 'INSERT INTO comments VALUES(NULL, $repo_name, $commit_sha, $file_idx, $row_idx, $timestamp, $comment_text)',
              { '$repo_name': comment.repo_name,
                '$commit_sha': comment.commit_sha,
                '$file_idx': comment.file_idx,
-               '$diff_row': comment.diff_row,
+               '$row_idx': comment.row_idx,
                '$timestamp': comment.timestamp,
                '$comment_text': comment.comment_text
              },
@@ -94,7 +94,7 @@ var _get_comments = function(repo_name, sha, callback) {
         'repo_name': 'linepost',
         'commit_sha': 'a084bff88',
         'file_idx': '1',
-        'diff_row': '2',
+        'row_idx': '2',
         'timestamp': new Date().getTime(),
         'comment_text': '"Hey there guy"'
     },
@@ -220,7 +220,7 @@ var _respond = {
     }
 };
 
-var _respond_error = {
+var _respondWithError = {
     'html': _content_sendError,
     'json': _api_sendError
 };
@@ -234,7 +234,7 @@ app.get('/:repo/:sha', function(req, res) {
     if (_repos[repo_name] === undefined) {
         var msg = 'Undefined repo: "' + repo_name + '"';
         try {
-            _respond_error[format](404, msg, res);
+            _respondWithError[format](404, msg, res);
         }
         catch (e1) {
             _content_sendError(415, 'Unknown format: ' + format, res);
@@ -264,7 +264,7 @@ app.post('/:repo/:sha', function(req, res) {
     // TODO - validate vals?
     var comment = {
         comment_text: req.body.comment_text,
-        diff_row: req.body.row_idx,
+        row_idx: req.body.row_idx,
         file_idx: req.body.file_idx,
         commit_sha: sha,
         repo_name: repo_name,
@@ -276,7 +276,12 @@ app.post('/:repo/:sha', function(req, res) {
             _api_sendError(500, error, res);
         }
         else {
-            res.writeHead(200);
+            var result_stringified = JSON.stringify(this);
+            res.writeHead(200, {
+                'Content-Type': 'application/json',
+                'Content-Length': result_stringified.length
+             });
+            res.write(result_stringified);
             res.end();
         }
     });

@@ -25,12 +25,14 @@
                     'file_idx': add_comment_row.attr('file_idx'),
                     'row_idx': add_comment_row.attr('row_idx'),
                     'comment_text': comment_text,
+                    'id': -1
                 };
                 
-                $.post('/#{repo}/#{sha}', comment, function() {
+                $.post('/#{repo}/#{sha}', comment, function(data) {
                     $(add_comment_row).remove();
-                    
-                    // FIXME - fake ID
+                    comment.id = data.lastID;
+                    console.log('got last id: ' + comment.id);
+                    // FIXME - fake ID, get real id on response
                     insertComments([comment]);
                     
                 }).error(function() {
@@ -89,7 +91,7 @@
                 // FIXME - handle order of multiple-comment idxs correctly (sort by id descending?)
                 $.each(comments, function(idx, comment) {
                     var file = $('#file_index_' + comment.file_idx);
-                    var target_row = $('.commentable', file).eq(comment.diff_row).parent();
+                    var target_row = $('.commentable', file).eq(comment.row_idx).parent();
                     
                     if (!file || !target_row) {
                         alert( 'bad comment' );
@@ -99,9 +101,10 @@
                     $(target_row).after(
                         '<tr class="comment-row"><td class="stripe" colspan=2></td><td class="comment" id="comment_id_' + comment.id + '"></td></tr>'
                     );
-                    
-                    var cell = $('#comment_id_' + comment.id);
+
+                    var cell = $('.comment', target_row.next());
                     $(cell).html( '<div class="comment-wrapper">' + showdown.makeHtml(comment.comment_text) + '</div>');
+
                 });
             }
             
