@@ -183,7 +183,7 @@ app.use(express.bodyDecoder());
 // TODO - Responder class with sendError() and sendData()
 // and a factory method responderForFormat(format)
 
-var _format_responders = {
+var _respond = {
     'html': function(repo_name, sha, res) {
         res.render('commit.haml', {
             locals: {
@@ -220,7 +220,7 @@ var _format_responders = {
     }
 };
 
-var _format_error_responders = {
+var _respond_error = {
     'html': _content_sendError,
     'json': _api_sendError
 };
@@ -234,7 +234,7 @@ app.get('/:repo/:sha', function(req, res) {
     if (_repos[repo_name] === undefined) {
         var msg = 'Undefined repo: "' + repo_name + '"';
         try {
-            _format_error_responders[format](404, msg, res);
+            _respond_error[format](404, msg, res);
         }
         catch (e1) {
             _content_sendError(415, 'Unknown format: ' + format, res);
@@ -244,7 +244,7 @@ app.get('/:repo/:sha', function(req, res) {
     
     if (_isGoodSha(sha)) {
         try {
-            _format_responders[format](repo_name, sha, res);
+            _respond[format](repo_name, sha, res);
         }
         catch (e2) {
             _content_sendError(415, 'Unknown format: ' + format, res);
