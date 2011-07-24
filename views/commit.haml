@@ -8,6 +8,7 @@
         %link{rel: "stylesheet", type: "text/css", href: "/comment.css"}
         
         %script{type: "text/javascript", src: "http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"}
+        %script{type: "text/javascript", src: "/jquery.timeago.js"}
         %script{type: "text/javascript", src: "/diffHighlighter.js"}
         %script{type: "text/javascript", src: "/showdown.js"}
         
@@ -26,7 +27,8 @@
                     'file_idx': comments_row.attr('file_idx'),
                     'row_idx': comments_row.attr('row_idx'),
                     'comment_text': comment_text,
-                    'id': -1
+                    'id': -1,
+                    'timestamp': new Date().getTime()
                 };
                 
                 $.post('/#{repo}/#{sha}', comment, function(data) {
@@ -117,7 +119,8 @@
                     var comment_div = $('#templates .comment').clone();
                     $(comment_div).attr('id', 'comment_id_' + comment.id);
                     $('.comment-content', comment_div).html(showdown.makeHtml(comment.comment_text));
-                    $('.timestamp', comment_div).html(new Date(comment.timestamp).toLocaleString());
+                    $('.timestamp', comment_div).attr('datetime', comment.timestamp);
+                    $('.timestamp', comment_div).timeago()
                     
                     // insert in the proper place in the comments container
                     if ($(comments_container).children().length === 0) {

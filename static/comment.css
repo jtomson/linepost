@@ -26,13 +26,15 @@
 
 .comment .header .timestamp {
     position: absolute;
-    right: 4px;
-    margin-top: 4px;
+    right: 0;
+    margin: 8px;
     color: #AEAEAE;
 }
 
 .comment .comment-content {
-    padding: 12px;
+/*    padding: px;*/
+    padding-left: 12px;
+    padding-right: 12px;
 }
 
 .comments-row {
