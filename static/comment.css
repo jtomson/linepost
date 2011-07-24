@@ -32,7 +32,7 @@
 }
 
 .comment .comment-content {
-/*    padding: px;*/
+    padding: 0;
     padding-left: 12px;
     padding-right: 12px;
 }
@@ -66,6 +66,10 @@
     border: none;
     border-bottom: 1px solid;
     border-color: #D3D3D3;
+}
+
+.add-comment-form textarea:focus {
+    outline: none;
 }
 
 .add-comment-form .button-container {
