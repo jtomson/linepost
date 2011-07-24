@@ -198,12 +198,11 @@
                     .comment-content
 
             .add-comment-form
-                .form-container
-                    %form{action: "", method: "post"}
-                        %textarea{name: "comment_text"}
-                        .button-container
-                            %button.cancel-button &= 'Discard'
-                            %button.submit-button &= 'Submit'
-                            %div{style: 'clear: both;'}
+                %form{action: "", method: "post"}
+                    %textarea{name: "comment_text"}
+                    .button-container
+                        %button.cancel-button &= 'Discard'
+                        %button.submit-button &= 'Submit'
+                        %div{style: 'clear: both;'}
                             
                 
