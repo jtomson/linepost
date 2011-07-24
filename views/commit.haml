@@ -14,6 +14,19 @@
         
         :javascript
             var _slide_speed = 300;
+            
+            function onCommentEditClicked() {
+                var edit_comment_form = $('#templates .edit-comment-form').clone();
+                var comment_text = $(this).parent().siblings('.comment-text').html();
+                $('textarea', edit_comment_form).val(comment_text);
+                var comment_html = $(this).parent().siblings('.comment-html');
+                $(edit_comment_form).hide();
+                $(this).parent().after(edit_comment_form);
+                $(comment_html).slideUp(_slide_speed, function() {
+                    $(edit_comment_form).hide().slideDown(_slide_speed);
+                })
+            }
+            
             function onCommentSubmitClicked() {
                 var add_comment_form = $(this).closest('.add-comment-form');
                 var comment_text = $('textarea[name="comment_text"]', add_comment_form).val();
@@ -128,9 +141,11 @@
                     // TODO - templatize
                     var comment_div = $('#templates .comment').clone();
                     $(comment_div).attr('id', 'comment_id_' + comment.id);
-                    $('.comment-content', comment_div).html(showdown.makeHtml(comment.comment_text));
+                    $('.comment-html', comment_div).html(showdown.makeHtml(comment.comment_text));
+                    $('.comment-text', comment_div).html(comment.comment_text); // save for editing
                     $('.timestamp', comment_div).attr('datetime', comment.timestamp);
-                    $('.timestamp', comment_div).timeago()
+                    $('.timestamp', comment_div).timeago();
+                    $('.edit-button', comment_div).click(onCommentEditClicked);
                     
                     // insert in the proper place in the comments container
                     if ($(comments_container).children().length === 0) {
@@ -200,9 +215,18 @@
                     %button.delete-button &= 'delete'
                     %button.edit-button &= 'edit'
                     %div{style: 'clear: both;'}
-                .comment-content
+                .comment-html
+                .comment-text{style: 'display: none'}
+                
+            .edit-comment-form.inline-form
+                %form{action: "", method: "put"}
+                    %textarea{name: "comment_text"}
+                    .button-container
+                        %button.cancel-button &= 'Cancel'
+                        %button.submit-button &= 'Update'
+                        %div{style: 'clear: both;'}
 
-            .add-comment-form
+            .add-comment-form.inline-form
                 %form{action: "", method: "post"}
                     %textarea{name: "comment_text"}
                     .button-container

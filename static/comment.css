@@ -68,7 +68,7 @@
 }
 
 
-.add-comment-form button {
+.inline-form button {
 	padding: 6px 8px;
 }
 
@@ -83,7 +83,7 @@
     border-right: none;
 }
 
-.add-comment-form {
+.inline-form {
     width: 900px;
     position: relative;
     margin-left: 18px;
@@ -94,7 +94,7 @@
     border: 1px solid #D3D3D3;
 }
 
-.add-comment-form textarea {
+.inline-form textarea {
     width: 100%;
     height: 120px;
     font-size: 1.0em;
@@ -105,21 +105,25 @@
     border-color: #D3D3D3;
 }
 
-.add-comment-form textarea:focus {
+.inline-form textarea:focus {
     outline: none;
 }
 
-.add-comment-form .button-container {
+.inline-form .button-container {
     position: relative;
     margin: 8px;
 }
 
-.add-comment-form .cancel-button {
+.inline-form .cancel-button {
     float: left;
 }
 
-.add-comment-form .submit-button {
+.inline-form .submit-button {
     float: right;
+}
+
+.edit-comment-form {
+    width: 856px;
 }
 
 /*.add-comment-row */.stripe {
@@ -129,7 +133,7 @@
 }
 
 /*
-.add-comment-form button {
+.inline-form button {
     -moz-box-shadow: 0px 1px 0px 0px #ffffff;
     -webkit-box-shadow: 0px 1px 0px 0px #ffffff;
     box-shadow: 0px 1px 0px 0px #ffffff;
@@ -149,12 +153,12 @@
     padding:6px 8px;
     text-decoration:none;
     text-shadow:1px 1px 0px #ffffff;
-}.add-comment-form button:hover {
+}.inline-form button:hover {
     background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #f6f6f6), color-stop(1, #ffffff) );
     background:-moz-linear-gradient( center top, #f6f6f6 5%, #ffffff 100% );
     filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f6f6f6', endColorstr='#ffffff');
     background-color:#f6f6f6;
-}.add-comment-form button:active {
+}.inline-form button:active {
     position:relative;
     top:1px;
 }*/

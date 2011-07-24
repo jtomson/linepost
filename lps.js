@@ -64,15 +64,23 @@ var _isGoodSha = function(sha) {
 
 // assumes comment is valid
 var _add_comment = function(comment, callback) {
-    _db.run( 'INSERT INTO comments VALUES(NULL, $repo_name, $commit_sha, $file_idx, $row_idx, $timestamp, $comment_text)',
-             { '$repo_name': comment.repo_name,
-               '$commit_sha': comment.commit_sha,
-               '$file_idx': comment.file_idx,
-               '$row_idx': comment.row_idx,
-               '$timestamp': comment.timestamp,
-               '$comment_text': comment.comment_text
-             },
-             callback);
+    _db.run('INSERT INTO comments VALUES(NULL, $repo_name, $commit_sha, $file_idx, $row_idx, $timestamp, $comment_text)',
+            { '$repo_name': comment.repo_name,
+              '$commit_sha': comment.commit_sha,
+              '$file_idx': comment.file_idx,
+              '$row_idx': comment.row_idx,
+              '$timestamp': comment.timestamp,
+              '$comment_text': comment.comment_text
+            },
+            callback);
+};
+
+var _update_comment = function(id, comment_text, callback) {
+    _db.run('UPDATE comments SET comment_text=$comment_text WHERE id=$id',
+            { '$comment_text': comment_text,
+               '$id': id
+            },
+            callback);
 };
 
 // assume params are clean
@@ -259,7 +267,7 @@ app.get('/:repo/:sha', function(req, res) {
 app.post('/:repo/:sha/comments', function(req, res) {
     var repo_name = req.params.repo;
     var sha = req.params.sha;
-    console.log('got: ' + sys.inspect(req.body));
+    console.log('Received POST: ' + sys.inspect(req.body));
     
     // TODO - validate vals?
     var comment = {
@@ -285,8 +293,12 @@ app.post('/:repo/:sha/comments', function(req, res) {
             res.end();
         }
     });
-    
-    
+});
+
+app.put('/:repo/:sha/comments/:id', function(req, res) {
+    console.log('Received PUT: ' + sys.inspect(req.body));
+    res.writeHead(200);
+    res.end();
 });
 
 app.listen(3000);
