@@ -6,8 +6,8 @@
 .comment {
     white-space: normal;
     width: 900px;
-    padding: 8px;
-    margin-left: auto;
+/*    padding: 8px;*/
+    margin-left: 18px;
     margin-right: auto;
     margin-top: 12px;
     margin-bottom: 12px;
@@ -45,7 +45,7 @@
 .add-comment-form {
     width: 900px;
     position: relative;
-    margin-left: auto;
+    margin-left: 18px;
     margin-right: auto;
     margin-top: 12px;
     margin-bottom: 12px;

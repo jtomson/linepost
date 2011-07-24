@@ -13,6 +13,7 @@
         %script{type: "text/javascript", src: "/showdown.js"}
         
         :javascript
+            var _slide_speed = 300;
             function onCommentSubmitClicked() {
                 var add_comment_form = $(this).closest('.add-comment-form');
                 var comment_text = $('textarea[name="comment_text"]', add_comment_form).val();
@@ -32,10 +33,12 @@
                 };
                 
                 $.post('/#{repo}/#{sha}', comment, function(data) {
-                    $(add_comment_form).remove();
-                    comment.id = data.lastID;
-                    
-                    insertComments([comment]);
+                    $(add_comment_form).slideUp(function() {
+                        comment.id = data.lastID;
+
+                        insertComments([comment]);
+                    });
+
                 }).error(function() {
                     alert('problem submitting comment');
                 });
@@ -76,8 +79,7 @@
                     $(comments_container).children().last().after(comment_form);
                 }
                 
-                // TODO - fix jump at end of animation
-                comment_form.hide().slideDown(350, function() {
+                comment_form.hide().slideDown(_slide_speed, function() {
                     $('textarea', comment_form).focus();
                 });
                 
@@ -88,7 +90,7 @@
                 
                 // hook up comment form buttons
                 $('.cancel-button', comment_form).click(function() {
-                    $(comment_form).slideUp(350, function() {
+                    $(comment_form).slideUp(_slide_speed, function() {
                         $(comment_form).remove();
                         // remove whole row if there were no other children in the comments form
                         if ($(comments_container).children().length === 0) {
@@ -138,6 +140,8 @@
                     else {
                         $(comments_container).children().last().after(comment_div);
                     }
+                    
+                    comment_div.hide().slideDown(_slide_speed);
 
                 });
             }
