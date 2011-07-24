@@ -49,6 +49,7 @@
                 
                 var file = $(commentable_row).closest('.file').get(0);
                 var file_idx = $('.file').index(file);
+                // TODO - put this f'n info right in the attrs for a commentable line
                 var row_idx = $('.commentable', file).index($('.commentable', commentable_row));
                 
                 // TODO - templatize
@@ -113,16 +114,17 @@
                     
                     var comments_container = getOrCreateCommentsContainer(commentable_row);
                     // TODO - templatize
-                    var html_string = '<div class="comment" id="comment_id_' + comment.id + '">'
-                                      + showdown.makeHtml(comment.comment_text)
-                                      + '</div>';
+                    var comment_div = $('#templates .comment').clone();
+                    $(comment_div).attr('id', 'comment_id_' + comment.id);
+                    $('.comment-content', comment_div).html(showdown.makeHtml(comment.comment_text));
+                    $('.timestamp', comment_div).html(new Date(comment.timestamp).toLocaleString());
                     
                     // insert in the proper place in the comments container
                     if ($(comments_container).children().length === 0) {
-                        $(comments_container).html(html_string);
+                        $(comments_container).html(comment_div);
                     }
                     else {
-                        $(comments_container).children().last().after(html_string);
+                        $(comments_container).children().last().after(comment_div);
                     }
 
                 });
@@ -177,6 +179,12 @@
             .diff-block
                 #diff-content
         #templates{style: 'display: none'}
+            .comment
+                .inner-frame
+                    .header
+                        .timestamp
+                    .comment-content
+
             .add-comment-form
                 .form-container
                     %form{action: "", method: "post"}

@@ -1,6 +1,38 @@
 
+.comments {
+    font-family: helvetica, arial;
+}
+
 .comment {
     white-space: normal;
+    width: 900px;
+    padding: 8px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.comment .inner-frame {
+    background: white;
+    border: 1px solid #D3D3D3;
+}
+
+.comment .header {
+    border-bottom: 1px solid #D3D3D3;
+    position: relative;
+    height: 2em;
+}
+
+.comment .header .timestamp {
+    position: absolute;
+    right: 4px;
+    margin-top: 4px;
+    color: #AEAEAE;
+}
+
+.comment .comment-content {
+    padding: 12px;
 }
 
 .comments-row {
@@ -9,18 +41,18 @@
 }
 
 .add-comment-form {
-    margin: 12px;
-    height: 200px;
 }
 
 .add-comment-form .form-container {
-/*    margin: 12px;*/
-    margin-left: 12px;
-    margin-bottom: 12px;
-    line-height: 1.5em;
-    margin-right: auto;
+
     width: 900px;
     position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    border-color: #D3D3D3;
+    border: 1px solid #D3D3D3;
 }
 
 .add-comment-form textarea {
@@ -29,21 +61,22 @@
     font-size: 1.0em;
     padding: 0;
     margin: 0;
+    border: none;
+    border-bottom: 1px solid;
+    border-color: #D3D3D3;
 }
 
 .add-comment-form .button-container {
-    width: 100%;
     position: relative;
+    margin: 8px;
 }
 
 .add-comment-form .cancel-button {
     float: left;
-    font-size: 1.2em;
 }
 
 .add-comment-form .submit-button {
     float: right;
-    font-size: 1.2em;
 }
 
 /*.add-comment-row */.stripe {
@@ -53,6 +86,26 @@
 }
 
 /* http://www.cssbuttongenerator.com/ */
+.add-comment-form button {
+	background-color:#ffffff;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	border-radius:3px;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	color:#666666;
+	font-family:arial;
+	font-size:15px;
+	font-weight:normal;
+	padding:6px 24px;
+	text-decoration:none;
+}.add-comment-form button:hover {
+	background-color:#f6f6f6;
+}.add-comment-form button:active {
+	position:relative;
+	top:1px;
+}
+/*
 .add-comment-form button {
     -moz-box-shadow: 0px 1px 0px 0px #ffffff;
     -webkit-box-shadow: 0px 1px 0px 0px #ffffff;
@@ -81,4 +134,4 @@
 }.add-comment-form button:active {
     position:relative;
     top:1px;
-}
+}*/
