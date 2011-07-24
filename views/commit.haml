@@ -28,14 +28,13 @@
                     'file_idx': comments_row.attr('file_idx'),
                     'row_idx': comments_row.attr('row_idx'),
                     'comment_text': comment_text,
-                    'id': -1,
-                    'timestamp': new Date().getTime()
+                    'id': -1
                 };
                 
-                $.post('/#{repo}/#{sha}', comment, function(data) {
+                $.post('/#{repo}/#{sha}/comments', comment, function(data) {
                     $(add_comment_form).slideUp(function() {
                         comment.id = data.lastID;
-
+                        comment.timestamp = new Date().getTime();
                         insertComments([comment]);
                     });
 
@@ -196,10 +195,12 @@
                 #diff-content
         #templates{style: 'display: none'}
             .comment
-                .inner-frame
-                    .header
-                        .timestamp
-                    .comment-content
+                .header
+                    .timestamp
+                    %button.delete-button &= 'delete'
+                    %button.edit-button &= 'edit'
+                    %div{style: 'clear: both;'}
+                .comment-content
 
             .add-comment-form
                 %form{action: "", method: "post"}

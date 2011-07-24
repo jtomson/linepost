@@ -3,6 +3,27 @@
     font-family: helvetica, arial;
 }
 
+/* http://www.cssbuttongenerator.com/ */
+.comments-wrapper button {
+	background-color:#ffffff;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	border-radius:3px;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	color:#666666;
+	font-family:arial;
+	font-size:15px;
+	font-weight:normal;
+	text-decoration:none;
+}.comments-wrapper button:hover {
+	background-color:#f6f6f6;
+}.comments-wrapper button:active {
+	position:relative;
+	top:1px;
+}
+
+
 .comment {
     white-space: normal;
     width: 900px;
@@ -11,9 +32,6 @@
     margin-right: auto;
     margin-top: 12px;
     margin-bottom: 12px;
-}
-
-.comment .inner-frame {
     background: white;
     border: 1px solid #D3D3D3;
 }
@@ -21,14 +39,37 @@
 .comment .header {
     border-bottom: 1px solid #D3D3D3;
     position: relative;
-    height: 2em;
+    padding: 4px;
+    height: 2.0em;
 }
 
 .comment .header .timestamp {
-    position: absolute;
-    right: 0;
-    margin: 8px;
+    position: relative;
+    float: left;
+    margin-left: 8px;
     color: #AEAEAE;
+    padding: 0;
+    height: 2.0em; /* same as header to center vertically */
+    line-height: 2.0em; /* ditto */
+}
+
+.comment .header button {
+    padding: 2px 8px;
+    color: #AEAEAE;
+    border-color: white;
+    float: right;
+    position: relative;
+}
+
+.comment .header button:hover {
+    padding: 2px 8px;
+    color: #666666;
+    border-color: #dcdcdc;
+}
+
+
+.add-comment-form button {
+	padding: 6px 8px;
 }
 
 .comment .comment-content {
@@ -55,7 +96,7 @@
 
 .add-comment-form textarea {
     width: 100%;
-    height: 100px;
+    height: 120px;
     font-size: 1.0em;
     padding: 0;
     margin: 0;
@@ -87,26 +128,6 @@
     border: 1px solid #D3D3D3;
 }
 
-/* http://www.cssbuttongenerator.com/ */
-.add-comment-form button {
-	background-color:#ffffff;
-	-moz-border-radius:3px;
-	-webkit-border-radius:3px;
-	border-radius:3px;
-	border:1px solid #dcdcdc;
-	display:inline-block;
-	color:#666666;
-	font-family:arial;
-	font-size:15px;
-	font-weight:normal;
-	padding:6px 24px;
-	text-decoration:none;
-}.add-comment-form button:hover {
-	background-color:#f6f6f6;
-}.add-comment-form button:active {
-	position:relative;
-	top:1px;
-}
 /*
 .add-comment-form button {
     -moz-box-shadow: 0px 1px 0px 0px #ffffff;
