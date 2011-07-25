@@ -46,11 +46,16 @@
 .comment .header .timestamp {
     position: relative;
     float: left;
-    margin-left: 8px;
+/*    margin-left: 8px;*/
     color: #AEAEAE;
     padding: 0;
     height: 2.0em; /* same as header to center vertically */
     line-height: 2.0em; /* ditto */
+    white-space: pre;
+}
+
+.comment .timestamp-wrapper {
+    margin-left: 8px;
 }
 
 .comment .header button {
@@ -67,6 +72,9 @@
     border-color: #dcdcdc;
 }
 
+.comment .comment-html {
+    padding: 8px;
+}
 
 .inline-form button {
 	padding: 6px 8px;
@@ -119,6 +127,10 @@
 }
 
 .inline-form .submit-button {
+    float: right;
+}
+
+.inline-form .update-button {
     float: right;
 }
 

@@ -17,14 +17,54 @@
             
             function onCommentEditClicked() {
                 var edit_comment_form = $('#templates .edit-comment-form').clone();
-                var comment_text = $(this).parent().siblings('.comment-text').html();
-                $('textarea', edit_comment_form).val(comment_text);
-                var comment_html = $(this).parent().siblings('.comment-html');
+                var comment = $(this).closest('.comment');
+                var comment_text = $('.comment-text', comment); // stores original markdown text
+                var edit_textarea = $('textarea', edit_comment_form);
+                var comment_html = $('.comment-html', comment);
+                
+                $(edit_textarea).val($(comment_text).html());
+                $(this).closest('.header').after(edit_comment_form);
                 $(edit_comment_form).hide();
-                $(this).parent().after(edit_comment_form);
                 $(comment_html).slideUp(_slide_speed, function() {
                     $(edit_comment_form).hide().slideDown(_slide_speed);
-                })
+                });
+                
+                $('form', edit_comment_form).submit(function() {});
+                
+                $('.cancel-button', edit_comment_form).click(function() {
+                   $(edit_comment_form).slideUp(_slide_speed, function() {
+                       $(edit_comment_form).remove();
+                       $(comment_html).slideDown(_slide_speed);
+                   });
+                   return false;
+                });
+                
+                $('.update-button', edit_comment_form).click(function() {
+                    var new_text = $(edit_textarea).val();
+                    var comment_id = $(this).closest('.comment').attr('comment-id');
+                    $.ajax({
+                      url: '/#{repo}/#{sha}/comments/' + comment_id,
+                      type: 'PUT',
+                      data: {'comment_text': new_text}
+                    }).success(function() {
+                        var showdown = new Showdown.converter();
+                        $(comment_html).html(showdown.makeHtml(new_text));
+                        $(comment_text).html(new_text); // stores original markdown text
+                        $(edit_comment_form).slideUp(_slide_speed, function() {
+                           $(comment_html).slideDown(_slide_speed, function() {
+                               $('.label', comment).show();
+                               var edited = $('.edited-timestamp', comment);
+                               $(edited).show().attr('datetime', new Date().getTime());
+                               $(edited).timeago();
+                           });
+                        });
+                    }).error(function() {
+                        alert( "error putting update");
+                    });
+                    return false;
+                });
+                
+                // TODO - disable edit button, attach Cancel & Update
             }
             
             function onCommentSubmitClicked() {
@@ -46,8 +86,10 @@
                 
                 $.post('/#{repo}/#{sha}/comments', comment, function(data) {
                     $(add_comment_form).slideUp(function() {
+                        var now = new Date().getTime();
                         comment.id = data.lastID;
-                        comment.timestamp = new Date().getTime();
+                        comment.added_timestamp = now,
+                        comment.edited_timestamp = now,
                         insertComments([comment]);
                     });
 
@@ -136,15 +178,24 @@
                         console.log( 'bad comment: ' + JSON.stringify(comment) );
                         return;
                     }
-                    
+                    console.log(JSON.stringify(comment));
                     var comments_container = getOrCreateCommentsContainer(commentable_row);
                     // TODO - templatize
                     var comment_div = $('#templates .comment').clone();
                     $(comment_div).attr('id', 'comment_id_' + comment.id);
+                    $(comment_div).attr('comment-id', comment.id);
                     $('.comment-html', comment_div).html(showdown.makeHtml(comment.comment_text));
                     $('.comment-text', comment_div).html(comment.comment_text); // save for editing
-                    $('.timestamp', comment_div).attr('datetime', comment.timestamp);
-                    $('.timestamp', comment_div).timeago();
+                    $('.added-timestamp', comment_div).attr('datetime', comment.added_timestamp);
+                    if (comment.added_timestamp !== comment.edited_timestamp) {
+                        $('.label', comment_div).show();
+                        $('.edited-timestamp', comment_div).show().attr('datetime', comment.edited_timestamp).timeago();
+                    }
+                    else {
+                        $('.label', comment_div).hide();
+                        $('.edited-timestamp', comment_div).hide();
+                    }
+                    $('.added-timestamp', comment_div).timeago();
                     $('.edit-button', comment_div).click(onCommentEditClicked);
                     
                     // insert in the proper place in the comments container
@@ -211,7 +262,11 @@
         #templates{style: 'display: none'}
             .comment
                 .header
-                    .timestamp
+                    .timestamp-wrapper
+                        %span.timestamp.label &= 'added '
+                        %span.added-timestamp.timestamp
+                        %span.timestamp.label &= ', last edited '
+                        %span.edited-timestamp.timestamp
                     %button.delete-button &= 'delete'
                     %button.edit-button &= 'edit'
                     %div{style: 'clear: both;'}
@@ -223,7 +278,7 @@
                     %textarea{name: "comment_text"}
                     .button-container
                         %button.cancel-button &= 'Cancel'
-                        %button.submit-button &= 'Update'
+                        %button.update-button &= 'Update'
                         %div{style: 'clear: both;'}
 
             .add-comment-form.inline-form

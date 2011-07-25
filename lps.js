@@ -51,7 +51,8 @@ var express = require('express'),
                 'commit_sha TEXT, ' +
                 'file_idx INTEGER, ' +
                 'row_idx INTEGER, ' +
-                'timestamp INTEGER, ' +
+                'added_timestamp INTEGER, ' +
+                'edited_timestamp INTEGER, ' +
                 'comment_text TEXT );', function(error) {if (error) { throw error; } });
     }
 
@@ -64,20 +65,22 @@ var _isGoodSha = function(sha) {
 
 // assumes comment is valid
 var _add_comment = function(comment, callback) {
-    _db.run('INSERT INTO comments VALUES(NULL, $repo_name, $commit_sha, $file_idx, $row_idx, $timestamp, $comment_text)',
+    _db.run('INSERT INTO comments VALUES(NULL, $repo_name, $commit_sha, $file_idx, $row_idx, $added_timestamp, $edited_timestamp, $comment_text)',
             { '$repo_name': comment.repo_name,
               '$commit_sha': comment.commit_sha,
               '$file_idx': comment.file_idx,
               '$row_idx': comment.row_idx,
-              '$timestamp': comment.timestamp,
+              '$added_timestamp': comment.added_timestamp,
+              '$edited_timestamp': comment.edited_timestamp,
               '$comment_text': comment.comment_text
             },
             callback);
 };
 
 var _update_comment = function(id, comment_text, callback) {
-    _db.run('UPDATE comments SET comment_text=$comment_text WHERE id=$id',
+    _db.run('UPDATE comments SET comment_text=$comment_text, edited_timestamp=$edited_timestamp WHERE id=$id',
             { '$comment_text': comment_text,
+              '$edited_timestamp': new Date().getTime(),
                '$id': id
             },
             callback);
@@ -270,13 +273,15 @@ app.post('/:repo/:sha/comments', function(req, res) {
     console.log('Received POST: ' + sys.inspect(req.body));
     
     // TODO - validate vals?
+    var now = new Date().getTime();
     var comment = {
         comment_text: req.body.comment_text,
         row_idx: req.body.row_idx,
         file_idx: req.body.file_idx,
         commit_sha: sha,
         repo_name: repo_name,
-        timestamp: new Date().getTime()
+        added_timestamp: now,
+        edited_timestamp: now
     };
     
     _add_comment(comment, function(error) {
@@ -297,8 +302,17 @@ app.post('/:repo/:sha/comments', function(req, res) {
 
 app.put('/:repo/:sha/comments/:id', function(req, res) {
     console.log('Received PUT: ' + sys.inspect(req.body));
-    res.writeHead(200);
-    res.end();
+    
+    // TODO - validate?
+    _update_comment(req.params.id, req.body.comment_text, function(error) {
+        if (error) {
+            _api_sendError(500, error, res);
+        }
+        else {
+            res.writeHead(200);
+            res.end();
+        }
+    })
 });
 
 app.listen(3000);
