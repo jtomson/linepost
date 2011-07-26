@@ -32,7 +32,9 @@
                 $(edit_textarea).val($(comment_text).html());
                 $(this).closest('.header').after(edit_comment_form);
                 $(edit_comment_form).hide();
+                var edit_button = this;
                 $(comment_html).slideUp(_slide_speed, function() {
+                    $(edit_button).fadeOut(_slide_speed);
                     $(edit_comment_form).hide().slideDown(_slide_speed);
                 });
                 
@@ -40,6 +42,7 @@
                 
                 $('.cancel-button', edit_comment_form).click(function() {
                    $(edit_comment_form).slideUp(_slide_speed, function() {
+                       $(edit_button).fadeIn(_slide_speed);
                        $(edit_comment_form).remove();
                        $(comment_html).slideDown(_slide_speed);
                    });
@@ -58,7 +61,8 @@
                         $(comment_html).html(showdown.makeHtml(new_text));
                         $(comment_text).html(new_text); // stores original markdown text
                         $(edit_comment_form).slideUp(_slide_speed, function() {
-                            $(edit_comment_form).remove();    
+                            $(edit_button).fadeIn(_slide_speed);
+                            $(edit_comment_form).remove();
                             $(comment_html).slideDown(_slide_speed, function() {
                                 $('.label', comment).show();
                                 var edited = $('.edited-timestamp', comment);
