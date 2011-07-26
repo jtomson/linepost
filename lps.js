@@ -111,9 +111,14 @@ var _get_comments = function(repo_name, sha, callback) {
     },
     function(error) { if(error) { throw error; } });
     
-    //_get_comments('linepost', 'ae12', function(rows) {console.log(sys.inspect(rows));});
+    //_get_comments('linepost', 'ae12', function(rows) {_log(res, sys.inspect(rows));});
 }());
 */
+
+var _log = function(req, msg) {
+    console.log( (req.socket && req.socket.remoteAddress)
+     + ' - - [' + (new Date).toUTCString() + '] ' + msg );
+};
 
 var _api_sendError = function(error_code, error_msg, res) {
     var error_stringified = JSON.stringify({'error': error_msg});
@@ -123,7 +128,7 @@ var _api_sendError = function(error_code, error_msg, res) {
                    'Content-Length': error_stringified.length});
     res.write(error_stringified);
     res.end();
-    console.log('sent api error code: ' + error_code + ', error: ' + error_stringified );
+    _log(res, 'sent api error code: ' + error_code + ', error: ' + error_stringified );
 };
 
 // TODO - nicer 404 pages etc
@@ -133,7 +138,7 @@ var _content_sendError = function(error_code, error_msg, res) {
                    'Content-Length': error_msg.length});
     res.write(error_msg);
     res.end();
-    console.log('sent content error code: ' + error_code + ', error: ' + error_msg );
+    _log(res, 'sent content error code: ' + error_code + ', error: ' + error_msg );
 };
 
 var _get_git_show = function(repo_name, sha, res, callback) {
@@ -170,7 +175,7 @@ var _get_git_show = function(repo_name, sha, res, callback) {
                             'diff': split_output_array[4]
                       }
                       callback(null, response);
-                      console.log('sent good output from git-show');
+                      _log(res, 'sent good output from git-show');
                   }
               }
           });
@@ -191,11 +196,13 @@ app.use(express.staticProvider(__dirname + '/static'));
 
 app.use(express.bodyDecoder());
 
-// TODO - Responder class with sendError() and sendData()
-// and a factory method responderForFormat(format)
 
+// ----- html/json commit responder actions
 var _respond = {
     'html': function(repo_name, sha, res) {
+        // TODO - generate this once & cache,
+        // use window.location to infer all ajax calls
+        // no need to have a tailored-with-urls copy for this commit
         res.render('commit.haml', {
             locals: {
                 'sha': sha,
@@ -205,6 +212,7 @@ var _respond = {
         });
     },
     'json': function(repo_name, sha, res) {
+        // return the git-show results & comments in one response
         var git_show_and_comments = {};
         
         _get_git_show(repo_name, sha, res, function(error, result) {
@@ -267,10 +275,11 @@ app.get('/:repo/:sha', function(req, res) {
     }
 });
 
+// add a new comment
 app.post('/:repo/:sha/comments', function(req, res) {
     var repo_name = req.params.repo;
     var sha = req.params.sha;
-    console.log('Received POST: ' + sys.inspect(req.body));
+    _log(res, 'Received POST: ' + sys.inspect(req.body));
     
     // TODO - validate vals?
     var now = new Date().getTime();
@@ -300,8 +309,9 @@ app.post('/:repo/:sha/comments', function(req, res) {
     });
 });
 
+// edit an existing comment
 app.put('/:repo/:sha/comments/:id', function(req, res) {
-    console.log('Received PUT: ' + sys.inspect(req.body));
+    _log(res, 'Received PUT: ' + sys.inspect(req.body));
     
     // TODO - validate?
     _update_comment(req.params.id, req.body.comment_text, function(error) {
@@ -313,6 +323,10 @@ app.put('/:repo/:sha/comments/:id', function(req, res) {
             res.end();
         }
     })
+});
+
+// delete a comment
+app.delete('/:repo/:sha/comments/:id', function(req, res) {
 });
 
 app.listen(3000);
