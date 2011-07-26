@@ -34,16 +34,16 @@
         prefixFromNow: null,
         suffixAgo: "ago",
         suffixFromNow: "from now",
-        seconds: "less than a minute",
-        minute: "about a minute",
+        seconds: "just now",
+        minute: "a minute",
         minutes: "%d minutes",
-        hour: "about an hour",
-        hours: "about %d hours",
-        day: "a day",
+        hour: "an hour",
+        hours: "%d hours",
+        day: "yesterday",
         days: "%d days",
-        month: "about a month",
+        month: "a month",
         months: "%d months",
-        year: "about a year",
+        year: "a year",
         years: "%d years",
         numbers: []
       }
@@ -84,7 +84,7 @@
         years < 2 && substitute($l.year, 1) ||
         substitute($l.years, Math.floor(years));
 
-      return $.trim([prefix, words, suffix].join(" "));
+      return $.trim([prefix, words, (seconds < 45) ? "" : suffix].join(" "));
     },
     parse: function(iso8601) {
       var s = $.trim(iso8601);
