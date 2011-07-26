@@ -53,7 +53,8 @@ var express = require('express'),
                 'row_idx INTEGER, ' +
                 'added_timestamp INTEGER, ' +
                 'edited_timestamp INTEGER, ' +
-                'comment_text TEXT );', function(error) {if (error) { throw error; } });
+                'comment_text TEXT, ' +
+                'deleted BOOLEAN DEFAULT 0);', function(error) {if (error) { throw error; } });
     }
 
 }());
@@ -65,7 +66,7 @@ var _isGoodSha = function(sha) {
 
 // assumes comment is valid
 var _add_comment = function(comment, callback) {
-    _db.run('INSERT INTO comments VALUES(NULL, $repo_name, $commit_sha, $file_idx, $row_idx, $added_timestamp, $edited_timestamp, $comment_text)',
+    _db.run('INSERT INTO comments VALUES(NULL, $repo_name, $commit_sha, $file_idx, $row_idx, $added_timestamp, $edited_timestamp, $comment_text, 0)',
             { '$repo_name': comment.repo_name,
               '$commit_sha': comment.commit_sha,
               '$file_idx': comment.file_idx,
@@ -86,10 +87,17 @@ var _update_comment = function(id, comment_text, callback) {
             callback);
 };
 
+var _delete_comment = function(id, callback) {
+    // just mark the row as deleted
+    _db.run('UPDATE comments SET deleted=1 WHERE id=$id',
+            { '$id': id },
+            callback);
+}
+
 // assume params are clean
 var _get_comments = function(repo_name, sha, callback) {
     // FIXME stores in memory so assuming not a whole lot of comments
-    _db.all( 'SELECT * from comments WHERE repo_name = $repo_name AND commit_sha LIKE $commit_sha || "%"',
+    _db.all( 'SELECT * from comments WHERE repo_name = $repo_name AND commit_sha LIKE $commit_sha || "%" AND deleted = 0',
              { '$repo_name': repo_name,
                '$commit_sha': sha },
              function(error, rows) {
@@ -279,7 +287,7 @@ app.get('/:repo/:sha', function(req, res) {
 app.post('/:repo/:sha/comments', function(req, res) {
     var repo_name = req.params.repo;
     var sha = req.params.sha;
-    _log(res, 'Received POST: ' + sys.inspect(req.body));
+    _log(res, 'Received POST body: ' + sys.inspect(req.body));
     
     // TODO - validate vals?
     var now = new Date().getTime();
@@ -311,7 +319,7 @@ app.post('/:repo/:sha/comments', function(req, res) {
 
 // edit an existing comment
 app.put('/:repo/:sha/comments/:id', function(req, res) {
-    _log(res, 'Received PUT: ' + sys.inspect(req.body));
+    _log(res, 'Received PUT body: ' + sys.inspect(req.body));
     
     // TODO - validate?
     _update_comment(req.params.id, req.body.comment_text, function(error) {
@@ -322,11 +330,20 @@ app.put('/:repo/:sha/comments/:id', function(req, res) {
             res.writeHead(200);
             res.end();
         }
-    })
+    });
 });
 
 // delete a comment
 app.delete('/:repo/:sha/comments/:id', function(req, res) {
+    _delete_comment(req.params.id, function(error) {
+        if (error) {
+            _api_sendError(500, error, res);
+        }
+        else {
+            res.writeHead(200);
+            res.end();
+        }
+    });
 });
 
 app.listen(3000);

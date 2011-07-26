@@ -15,6 +15,13 @@
         :javascript
             var _slide_speed = 300;
             
+            function removeCommentsRowIfLastComment(comment) {
+                var comments_container = $(comment).closest('.comments-wrapper');
+                if ($(comments_container).children().length === 1) {
+                   $(comments_container).closest('tr').remove();
+                }
+            }
+            
             function onCommentEditClicked() {
                 var edit_comment_form = $('#templates .edit-comment-form').clone();
                 var comment = $(this).closest('.comment');
@@ -51,11 +58,12 @@
                         $(comment_html).html(showdown.makeHtml(new_text));
                         $(comment_text).html(new_text); // stores original markdown text
                         $(edit_comment_form).slideUp(_slide_speed, function() {
-                           $(comment_html).slideDown(_slide_speed, function() {
-                               $('.label', comment).show();
-                               var edited = $('.edited-timestamp', comment);
-                               $(edited).show().attr('datetime', new Date().getTime());
-                               $(edited).timeago();
+                            $(edit_comment_form).remove();    
+                            $(comment_html).slideDown(_slide_speed, function() {
+                                $('.label', comment).show();
+                                var edited = $('.edited-timestamp', comment);
+                                $(edited).show().attr('datetime', new Date().getTime());
+                                $(edited).timeago();
                            });
                         });
                     }).error(function() {
@@ -65,6 +73,24 @@
                 });
                 
                 // TODO - disable edit button, attach Cancel & Update
+            }
+            
+            function onCommentDeleteClicked() {
+                if (!confirm('Are you sure you want to delete this comment?')) {
+                    return;
+                }
+                var comment = $(this).closest('.comment');
+                $.ajax({
+                    url: '/#{repo}/#{sha}/comments/' + comment.attr('comment-id'),
+                    type: 'DELETE'
+                }).success(function() {
+                    $(comment).slideUp(_slide_speed, function() {
+                        removeCommentsRowIfLastComment(comment);
+                        $(comment).remove(); 
+                    });
+                }).error(function() {
+                   alert('problem deleting comment'); 
+                });
             }
             
             function onCommentSubmitClicked() {
@@ -87,10 +113,14 @@
                 $.post('/#{repo}/#{sha}/comments', comment, function(data) {
                     $(add_comment_form).slideUp(function() {
                         var now = new Date().getTime();
+                        
                         comment.id = data.lastID;
                         comment.added_timestamp = now,
                         comment.edited_timestamp = now,
+                        
                         insertComments([comment]);
+                        
+                        $(add_comment_form).remove();
                     });
 
                 }).error(function() {
@@ -145,11 +175,8 @@
                 // hook up comment form buttons
                 $('.cancel-button', comment_form).click(function() {
                     $(comment_form).slideUp(_slide_speed, function() {
+                        removeCommentsRowIfLastComment(comment_form);
                         $(comment_form).remove();
-                        // remove whole row if there were no other children in the comments form
-                        if ($(comments_container).children().length === 0) {
-                           $(comments_container).closest('tr').remove();
-                        }
                     });
                     return false;
                     // don't reload page
@@ -197,6 +224,7 @@
                     }
                     $('.added-timestamp', comment_div).timeago();
                     $('.edit-button', comment_div).click(onCommentEditClicked);
+                    $('.delete-button', comment_div).click(onCommentDeleteClicked);
                     
                     // insert in the proper place in the comments container
                     if ($(comments_container).children().length === 0) {
