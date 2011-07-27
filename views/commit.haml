@@ -256,6 +256,49 @@
                 });
             }
             
+            // a highlightDiff callback to generate links in the .files-list div
+            function addFileDiffLink(name1, name2, id, mode_change, old_mode, new_mode) {
+                var img = document.createElement("img");
+                var p = document.createElement("p");
+                var link = document.createElement("a");
+                link.setAttribute("href", "#" + id);
+                p.appendChild(link);
+                var finalFile = "";
+                if (name1 == name2) {
+                    finalFile = name1;
+                    img.src = "/modified.png";
+                    img.title = "Modified file";
+                    p.title = "Modified file";
+                    if (mode_change)
+                    p.appendChild(document.createTextNode(" mode " + old_mode + " -> " + new_mode));
+                }
+                 else if (name1 == "/dev/null") {
+                    img.src = "/added.png";
+                    img.title = "Added file";
+                    p.title = "Added file";
+                    finalFile = name2;
+                }
+                 else if (name2 == "/dev/null") {
+                    img.src = "/removed.png";
+                    img.title = "Removed file";
+                    p.title = "Removed file";
+                    finalFile = name1;
+                }
+                 else {
+                    img.src = "/renamed.png";
+                    img.title = "Renamed file";
+                    p.title = "Renamed file";
+                    finalFile = name2;
+                    p.insertBefore(document.createTextNode(name1 + " -> "), link);
+                }
+
+                link.appendChild(document.createTextNode(finalFile));
+                link.setAttribute("representedFile", finalFile);
+
+                p.insertBefore(img, link);
+                $(".file-links").append(p);
+            }
+            
             function getCommitJSON() {
                 $.getJSON("/#{repo}/#{sha}?format=json", function(data) {
                   $('.loading').hide();
@@ -279,7 +322,7 @@
           
                   // markup diff tables
                   var highlighter = new DiffHighlighter.highlighter();
-                  highlighter.highlightDiff(data.git_show.diff, $('#diff-content').get(0));
+                  highlighter.highlightDiff(data.git_show.diff, $('#diff-content').get(0), {'newfile': addFileDiffLink});
           
                   // bind double-clicking a row - add a form comment
                   $('.diff .commentable').dblclick(onCommentableDblClicked);
@@ -302,8 +345,11 @@
                     %span &= 'message:'
                     #subject-and-body
                     
+            .file-links
+            
             .diff-block
                 #diff-content
+                
         #templates{style: 'display: none'}
             .comment
                 .header
