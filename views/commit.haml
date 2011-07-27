@@ -57,13 +57,17 @@
                       type: 'PUT',
                       data: {'comment_text': new_text}
                     }).success(function() {
+                        // update comment html
                         var showdown = new Showdown.converter();
                         $(comment_html).html(showdown.makeHtml(new_text));
-                        $(comment_text).html(new_text); // stores original markdown text
+                        $(comment_text).html(new_text); // store original markdown text
+                        // hide the edit form
                         $(edit_comment_form).slideUp(_anim_speed, function() {
                             $(edit_button).fadeIn(_anim_speed);
                             $(edit_comment_form).remove();
+                            // show the rendered html
                             $(comment_html).slideDown(_anim_speed, function() {
+                                // now show 'last edited' in header
                                 $('.label', comment).show();
                                 var edited = $('.edited-timestamp', comment);
                                 $(edited).show().attr('datetime', new Date().getTime());
@@ -76,7 +80,6 @@
                     return false;
                 });
                 
-                // TODO - disable edit button, attach Cancel & Update
             }
             
             function onCommentDeleteClicked() {
@@ -134,15 +137,18 @@
                 return false;
             }
             
-            function getOrCreateCommentsContainer(commentable_row) {
+            // get the parent container for comments related to the commentable diff row
+            function getCommentsContainer(commentable_row) {
+                
+                // the parent container lives in a cell in the next row
                 var comments_div = $('.comments-wrapper', commentable_row.next());
                 if (comments_div.length !== 0) {
                     return comments_div;
                 }
                 
-                var file = $(commentable_row).closest('.file').get(0);
+                // nothing found - insert a new row to hold the comments
+                var file = $(commentable_row).closest('.file');
                 var file_idx = $('.file').index(file);
-                // TODO - put this f'n info right in the attrs for a commentable line
                 var row_idx = $('.commentable', file).index($('.commentable', commentable_row));
                 
                 // TODO - templatize
@@ -151,15 +157,23 @@
                                       + '" row_idx="'
                                       + row_idx 
                                       + '"><td class="stripe" colspan=2></td><td class="comments"><div class="comments-wrapper"></div></td></tr>');
+                
                 return $('.comments-wrapper', commentable_row.next());
             }
             
-            function addCommentFormRow() {
-                var comment_form = $('#templates .add-comment-form').clone();
+            function onCommentableDblClicked() {
                 var target_row = $(this).closest('tr');
-                var comments_container = getOrCreateCommentsContainer(target_row);
+                var comments_container = getCommentsContainer(target_row);
                 
-                // insert in the proper place in the comments container
+                var existing_form = $('.add-comment-form', comments_container);
+                if (existing_form.length !== 0) {
+                    $('existing_form').focus();
+                    return;
+                }
+                
+                var comment_form = $('#templates .add-comment-form').clone();
+                
+                // insert in the proper place (last) in the comments container
                 if ($(comments_container).children().length === 0) {
                     $(comments_container).html(comment_form);
                 }
@@ -200,7 +214,6 @@
             function insertComments(comments) {
                 var showdown = new Showdown.converter();
 
-                // FIXME - handle order of multiple-comment idxs correctly (sort by id descending?)
                 $.each(comments, function(idx, comment) {
                     var file = $('#file_index_' + comment.file_idx);
                     var commentable_row = $('.commentable', file).eq(comment.row_idx).parent();
@@ -210,11 +223,11 @@
                         return;
                     }
                     console.log(JSON.stringify(comment));
-                    var comments_container = getOrCreateCommentsContainer(commentable_row);
-                    // TODO - templatize
+                    var comments_container = getCommentsContainer(commentable_row);
                     var comment_div = $('#templates .comment').clone();
                     $(comment_div).attr('id', 'comment_id_' + comment.id);
                     $(comment_div).attr('comment-id', comment.id);
+                    
                     $('.comment-html', comment_div).html(showdown.makeHtml(comment.comment_text));
                     $('.comment-text', comment_div).html(comment.comment_text); // save for editing
                     $('.added-timestamp', comment_div).attr('datetime', comment.added_timestamp);
@@ -269,7 +282,7 @@
                   highlighter.highlightDiff(data.git_show.diff, $('#diff-content').get(0));
           
                   // bind double-clicking a row - add a form comment
-                  $('.diff .commentable').dblclick(addCommentFormRow);
+                  $('.diff .commentable').dblclick(onCommentableDblClicked);
                   
                   // add existing comments to the diff rows
                   insertComments(data.comments);
