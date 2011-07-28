@@ -140,7 +140,7 @@
 }
 
 /*.add-comment-row */.stripe {
-    background-image: url('/stripe.png');
+    background-image: url('/images/stripe.png');
     background-repeat: repeat-x repeat-y;
     border: 1px solid #D3D3D3;
 }

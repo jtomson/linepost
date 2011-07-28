@@ -14,6 +14,7 @@
 	overflow-y: hidden;
 	margin-bottom: 12px;
 	position: relative;
+	font-family: Menlo, Monaco;
 }
 
 .diff table {
@@ -28,14 +29,23 @@
 .diff .fileHeader {
 	margin-top: -5px;
 	padding-bottom: 1px;
+	margin-bottom: 5px;
 	font-size: 1.2em;
 	font-weight: bold;
 	font-family: helvetica, arial;
 }
 
+.diff .file .commentable.binary {
+    padding-left: 1em;
+}
+
+.diff .file tr.binary {
+    height: 2em;
+    border: 1px solid #CCC;
+}
+
 .diff .file .diffContent {
 	white-space: pre;
-	font-family: Menlo, Monaco;
 }
 
 .diff .lineno {

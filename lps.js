@@ -7,7 +7,7 @@ var _git_bin = 'git';
 
 // repo_name -> local repo dir map
 var _repos = {
-    'linepost': '/Users/james/sandbox/linepost'
+    'linepost': '/Users/jtomson/sandbox/linepost'
 };
 
 // sqlite db

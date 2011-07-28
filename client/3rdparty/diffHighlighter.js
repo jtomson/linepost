@@ -101,12 +101,25 @@ this.highlightDiff = function(diff, element, callbacks) {
 					finalContent += callbacks["binaryFile"](binaryname);
 				}
 				else {
+				    var msg = "";
+				    var classes = "commentable binary ";
 				    if (endname == "/dev/null") {
-				        finalContent += '<div class="commentable">Binary file removed</div>';
+				        msg = "Binary file removed";
+				        classes += "delline";
 				    }
-				    else {
-    					finalContent += '<div class="commentable">Binary file differs</div>';
+				    else if (startname == "/dev/null"){
+    					msg = "Binary file added";
+				        classes += "addline";
 					}
+					else {
+					    msg = "Binary file differs";
+					}
+					
+					finalContent += '<table><tr class="binary diffline" ><td class="lineno">...</td><td class="lineno">...</td><td class="'
+					                + classes
+					                + '">'
+					                + msg
+					                + '</td></tr></table>';
 				}
 			}
 			else {
