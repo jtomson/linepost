@@ -257,7 +257,7 @@
             }
             
             // a highlightDiff callback to generate links in the .files-list div
-            function addFileDiffLink(name1, name2, id, mode_change, old_mode, new_mode) {
+            function addFileLink(name1, name2, id, mode_change, old_mode, new_mode) {
                 var img = document.createElement("img");
                 var p = document.createElement("p");
                 var link = document.createElement("a");
@@ -266,26 +266,26 @@
                 var finalFile = "";
                 if (name1 == name2) {
                     finalFile = name1;
-                    img.src = "/modified.png";
+                    img.src = "/images/modified.png";
                     img.title = "Modified file";
                     p.title = "Modified file";
                     if (mode_change)
                     p.appendChild(document.createTextNode(" mode " + old_mode + " -> " + new_mode));
                 }
                  else if (name1 == "/dev/null") {
-                    img.src = "/added.png";
+                    img.src = "/images/added.png";
                     img.title = "Added file";
                     p.title = "Added file";
                     finalFile = name2;
                 }
                  else if (name2 == "/dev/null") {
-                    img.src = "/removed.png";
+                    img.src = "/images/removed.png";
                     img.title = "Removed file";
                     p.title = "Removed file";
                     finalFile = name1;
                 }
                  else {
-                    img.src = "/renamed.png";
+                    img.src = "/images/renamed.png";
                     img.title = "Renamed file";
                     p.title = "Renamed file";
                     finalFile = name2;
@@ -322,7 +322,7 @@
           
                   // markup diff tables
                   var highlighter = new DiffHighlighter.highlighter();
-                  highlighter.highlightDiff(data.git_show.diff, $('#diff-content').get(0), {'newfile': addFileDiffLink});
+                  highlighter.highlightDiff(data.git_show.diff, $('#diff-content').get(0), {'newfile': addFileLink});
           
                   // bind double-clicking a row - add a form comment
                   $('.diff .commentable').dblclick(onCommentableDblClicked);

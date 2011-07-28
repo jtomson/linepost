@@ -190,7 +190,8 @@ var _get_git_show = function(repo_name, sha, res, callback) {
 };
 
 var _content_sendCommitPage = function(reponame, sha, res) {
-    // TODO render template, include ajax-pull to api
+    // TODO - static page
+    // all that's needed is to look at the window.url
     res.render('commit.haml', {
         locals: {'sha': sha,
                  'repo': reponame },

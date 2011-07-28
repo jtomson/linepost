@@ -78,26 +78,35 @@ this.highlightDiff = function(diff, element, callbacks) {
         
 		var title = startname;
 		var binaryname = endname;
-		if (startname == "/dev/null") {
-			title = endname;
+		
+		if (endname == "/dev/null") {
 			binaryname = startname;
+			title = startname;
+		}
+		else if (startname == "/dev/null") {
+			title = endname;
 		}
 		else if (startname != endname) {
 			title = startname + " renamed to " + endname;
 		}
 
 		// If there's a diff or a binary file that hasn't been deleted, we'll make an element
-		if (diffContent != "" || (binary && endname != "/dev/null")) {
+		if (diffContent != "") {
 
 			finalContent += '<div class="file" id="file_index_' + (file_index - 1) + '">' +
 							'<div class="fileHeader">' + title + '</div>';
-				
+			// FIXME - make these table rows
 			if (binary) {
 			    if (callbacks["binaryFile"]) {
 					finalContent += callbacks["binaryFile"](binaryname);
 				}
 				else {
-					finalContent += "<div>Binary file differs</div>";
+				    if (endname == "/dev/null") {
+				        finalContent += '<div class="commentable">Binary file removed</div>';
+				    }
+				    else {
+    					finalContent += '<div class="commentable">Binary file differs</div>';
+					}
 				}
 			}
 			else {
@@ -126,6 +135,8 @@ this.highlightDiff = function(diff, element, callbacks) {
 		if (firstChar == "d" && l.charAt(1) == "i") { // "diff", i.e. new file, we have to reset everything
 			// diff always starts with a header
 			header = true;
+			
+			// FIXME - table start & end
 
 			// finish previous file ?
 			diffContent += "</table>";

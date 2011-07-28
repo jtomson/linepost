@@ -16,3 +16,32 @@
 .info-block #subject-and-body {
     color: black;
 }
+
+.file-links {
+    width: 1024px;
+    margin: 24px auto;
+}
+
+.file-links p {
+    padding: 0;
+    width: 100%;
+    font-size: 1.1em;
+    margin: 0 0 0 0;
+}
+
+.file-links p:nth-child(even) {
+    background: #ECECEC;
+}
+
+.file-links p:nth-child(odd) {
+    background: white;
+}
+
+.file-links img {
+    margin: 0 8px 0 0;
+    padding: 0;
+}
+
+.file-links a {
+    color: black;
+}
