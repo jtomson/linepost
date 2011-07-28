@@ -114,8 +114,18 @@ this.highlightDiff = function(diff, element, callbacks) {
 					else {
 					    msg = "Binary file differs";
 					}
-					
-					finalContent += '<table><tr class="binary diffline" ><td class="lineno">...</td><td class="lineno">...</td><td class="'
+					var file_id = file_index - 1;
+					var lol = "file_" + file_id + "oldline_0";
+					var lor = "file_" + file_id + "newline_0";
+					finalContent += '<table><tr class="binary diffline"><td class="lineno" id="'
+					                + lol
+					                + '"><a href="#'
+					                + lol
+					                + '">...</a></td><td class="lineno" id="'
+					                + lor
+					                + '"><a href="#'
+					                + lor
+					                + '">...</a></td><td class="'
 					                + classes
 					                + '">'
 					                + msg
@@ -240,21 +250,20 @@ this.highlightDiff = function(diff, element, callbacks) {
 				continue;
 		}
 		
-		sindex = "index=" + lindex.toString() + " ";
+		sindex = "id=" + lindex.toString() + " ";
 		if (firstChar == "+") {
 			// Highlight trailing whitespace
 			if (m = l.match(/\s+$/))
 				l = l.replace(/\s+$/, "<span class='whitespace'>" + m + "</span>");
-				
 			diffContent += "<tr>";
 			diffContent += "<td class='lineno'>" + " " + "</td>";
-			diffContent += "<td class='lineno'>" + ++hunk_start_line_2 + "</td>";
+			diffContent += "<td class='lineno'><a href='#" + lindex + "'>" + ++hunk_start_line_2 + "</a></td>";
 			diffContent += "<td " + sindex + "class='commentable addline'>" + l + "</td>";
 			diffContent += "</tr>";
 		}
 		else if (firstChar == "-") {
 			diffContent += "<tr>";
-			diffContent += "<td class='lineno'>" + ++hunk_start_line_1 + "</td>";
+			diffContent += "<td class='lineno'><a href='#" + lindex + "'>" + ++hunk_start_line_1 + "</a></td>";
 			diffContent += "<td class='lineno'>" + " " + "</td>";
 			diffContent += "<td " + sindex + "class='commentable delline'>" + l + "</td>";
 			diffContent += "</tr>";
@@ -269,15 +278,15 @@ this.highlightDiff = function(diff, element, callbacks) {
 			}
 			
 			diffContent += "<tr>";
-			diffContent += "<td class='lineno'>" + "..." + "</td>";
-			diffContent += "<td class='lineno'>" + "..." + "</td>";
+			diffContent += "<td class='lineno'><a href='#" + lindex + "'>..." + "</a></td>";
+			diffContent += "<td class='lineno'><a href='#" + lindex + "'>..." + "</a></td>";
 			diffContent += "<td " + sindex + "class='commentable hunkheader'>" + l + "</td>";
 			diffContent += "</tr>";
 		}
 		else if (firstChar == " ") {
 			diffContent += "<tr>";
-			diffContent += "<td class='lineno'>" + ++hunk_start_line_1 + "</td>";
-			diffContent += "<td class='lineno'>" + ++hunk_start_line_2 + "</td>";
+			diffContent += "<td class='lineno'><a href='#" + lindex + "'>" + ++hunk_start_line_1 + "</a></td>";
+			diffContent += "<td class='lineno'><a href='#" + lindex + "'>" + ++hunk_start_line_2 + "</a></td>";
 			diffContent += "<td " + sindex + "class='commentable noopline'>" + l + "</td>";
 			diffContent += "</tr>";
 		}

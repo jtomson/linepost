@@ -61,6 +61,15 @@
 	text-align: right;
 }
 
+.diff .lineno a {
+    color: #A9A9A9;
+    text-decoration: none;
+}
+
+.diff .lineno a:hover {
+    text-decoration: underline;
+}
+
 .diff .noteRow {
     font-family: Arial, Helvetica;
 	background-color: #FAFAFA;
@@ -103,6 +112,7 @@
 
 .diff .whitespace {
 	background-color: rgba(255,0,0,0.5);
+	display: none;
 }
 
 #CurrentHunk {

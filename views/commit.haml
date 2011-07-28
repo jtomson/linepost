@@ -331,6 +331,9 @@
                   // add existing comments to the diff rows
                   insertComments(data.comments);
                   
+                  // TODO - use nice scrollTo plugin to animate & highlight
+                  $('html').scrollTop($(window.location.hash).offset().top);
+                  
           
                 }).error(function(qXHR, textStatus, errorThrown) {
                     $('.loading').html( 'error loading commit: ' + errorThrown );
