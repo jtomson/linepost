@@ -39,7 +39,7 @@ String.prototype.unEscapeHTML = function() {
 
 //-------------
 
-this.highlightDiff = function(diff, element) {
+this.highlightDiff = function(diff, element, callbacks) {
 	if (!diff || diff == "")
 		return;
 
@@ -72,11 +72,15 @@ this.highlightDiff = function(diff, element) {
 			file_index++;
 			return;
 		}
-
-		var title = startname;
 		
+		if (callbacks["newfile"])
+			callbacks["newfile"](startname, endname, "file_index_" + (file_index - 1), mode_change, old_mode, new_mode);
+        
+		var title = startname;
+		var binaryname = endname;
 		if (startname == "/dev/null") {
 			title = endname;
+			binaryname = startname;
 		}
 		else if (startname != endname) {
 			title = startname + " renamed to " + endname;
@@ -89,7 +93,13 @@ this.highlightDiff = function(diff, element) {
 							'<div class="fileHeader">' + title + '</div>';
 				
 			if (binary) {
-				finalContent += "<div>Binary file differs</div>";			}
+			    if (callbacks["binaryFile"]) {
+					finalContent += callbacks["binaryFile"](binaryname);
+				}
+				else {
+					finalContent += "<div>Binary file differs</div>";
+				}
+			}
 			else {
 				finalContent +=	 '<div class="diffContent">' + diffContent + '</div>';
 			}
