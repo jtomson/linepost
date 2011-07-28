@@ -20,13 +20,17 @@
 .file-links {
     width: 1024px;
     margin: 24px auto;
+    border: 0 solid #A9A9A9;
+    border-width: 1px 1px 0 1px;
+    line-height: 2em;
 }
 
 .file-links p {
-    padding: 0;
-    width: 100%;
+    border: 0 solid #A9A9A9;
+    border-width: 0px 0px 1px 0;
     font-size: 1.1em;
-    margin: 0 0 0 0;
+    margin: 0;
+    padding: 0 0 0 8px;
 }
 
 .file-links p:nth-child(even) {
@@ -43,5 +47,15 @@
 }
 
 .file-links a {
-    color: black;
+    color: #3F3F3F;
+    font-weight: 400;
+    text-decoration: none;
+}
+
+.file-links a:visited {
+/*    color: darkblue;*/
+}
+
+.file-links a:hover {
+    text-decoration: underline;
 }

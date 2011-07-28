@@ -309,9 +309,7 @@
                       return;
                   }
                   
-                  // populate info-block
-                  $('.info-block').fadeIn(650);
-          
+                  // populate info-bloc
                   $('#sha').append( data.git_show.sha );
                   $('#author-name-and-email').append( data.git_show['author-name-and-email'] );
           
@@ -327,8 +325,12 @@
                   // bind double-clicking a row - add a form comment
                   $('.diff .commentable').dblclick(onCommentableDblClicked);
                   
+                  $('.info-block').fadeIn(_anim_speed);
+                  $('.file-links').fadeIn(_anim_speed);
+              
                   // add existing comments to the diff rows
                   insertComments(data.comments);
+                  
           
                 }).error(function(qXHR, textStatus, errorThrown) {
                     $('.loading').html( 'error loading commit: ' + errorThrown );
@@ -345,7 +347,7 @@
                     %span &= 'message:'
                     #subject-and-body
                     
-            .file-links
+            .file-links{style: 'display: none'}
             
             .diff-block
                 #diff-content
