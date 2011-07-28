@@ -167,7 +167,7 @@
                 
                 var existing_form = $('.add-comment-form', comments_container);
                 if (existing_form.length !== 0) {
-                    $('existing_form').focus();
+                    $('textarea', existing_form).focus();
                     return;
                 }
                 
