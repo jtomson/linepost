@@ -3,14 +3,14 @@
     %head
         %title = "commit #{sha} in #{repo}"
         
-        %link{rel: "stylesheet", type: "text/css", href: "/commit.css"}
-        %link{rel: "stylesheet", type: "text/css", href: "/diff.css"}
-        %link{rel: "stylesheet", type: "text/css", href: "/comment.css"}
+        %link{rel: "stylesheet", type: "text/css", href: "/css/commit.css"}
+        %link{rel: "stylesheet", type: "text/css", href: "/css/diff.css"}
+        %link{rel: "stylesheet", type: "text/css", href: "/css/comment.css"}
         
         %script{type: "text/javascript", src: "http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"}
-        %script{type: "text/javascript", src: "/jquery.timeago.js"}
-        %script{type: "text/javascript", src: "/diffHighlighter.js"}
-        %script{type: "text/javascript", src: "/showdown.js"}
+        %script{type: "text/javascript", src: "/3rdparty/jquery.timeago.js"}
+        %script{type: "text/javascript", src: "/3rdparty/diffHighlighter.js"}
+        %script{type: "text/javascript", src: "/3rdparty/showdown.js"}
         
         :javascript
             var _anim_speed = 300;

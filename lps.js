@@ -7,7 +7,7 @@ var _git_bin = 'git';
 
 // repo_name -> local repo dir map
 var _repos = {
-    'linepost': '/Users/jtomson/sandbox/linepost'
+    'linepost': '/Users/james/sandbox/linepost'
 };
 
 // sqlite db
@@ -200,7 +200,7 @@ var _content_sendCommitPage = function(reponame, sha, res) {
 // ----- App middleware + routing
 app.use(connect.logger());
 
-app.use(express.staticProvider(__dirname + '/static'));
+app.use(express.staticProvider(__dirname + '/client'));
 
 app.use(express.bodyDecoder());
 
