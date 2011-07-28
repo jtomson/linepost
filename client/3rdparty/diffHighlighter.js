@@ -115,18 +115,15 @@ this.highlightDiff = function(diff, element, callbacks) {
 					    msg = "Binary file differs";
 					}
 					var file_id = file_index - 1;
-					var lol = "file_" + file_id + "oldline_0";
-					var lor = "file_" + file_id + "newline_0";
-					finalContent += '<table><tr class="binary diffline"><td class="lineno" id="'
-					                + lol
-					                + '"><a href="#'
-					                + lol
-					                + '">...</a></td><td class="lineno" id="'
-					                + lor
-					                + '"><a href="#'
-					                + lor
+					var line_id = "file_" + file_id + "line_0";
+					finalContent += '<table><tr class="binary diffline"><td class="lineno"><a href="#'
+					                + line_id
+					                + '">...</a></td><td class="lineno"><a href="#'
+					                + line_id
 					                + '">...</a></td><td class="'
 					                + classes
+					                + '" id="'
+					                + line_id
 					                + '">'
 					                + msg
 					                + '</td></tr></table>';
