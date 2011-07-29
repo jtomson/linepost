@@ -20,21 +20,21 @@
 .file-links {
     width: 1024px;
     margin: 24px auto;
-    border: 0 solid #A9A9A9;
-    border-width: 1px 1px 0 1px;
+/*    border: 0 solid #A9A9A9;*/
+/*    border-width: 1px 1px 0 1px;*/
     line-height: 2em;
 }
 
 .file-links p {
     border: 0 solid #A9A9A9;
-    border-width: 0px 0px 1px 0;
+/*    border-width: 0px 0px 1px 0;*/
     font-size: 1.1em;
     margin: 0;
     padding: 0 0 0 8px;
 }
 
 .file-links p:nth-child(even) {
-    background: #ECECEC;
+    background: #F5F5F5;
 }
 
 .file-links p:nth-child(odd) {

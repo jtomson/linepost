@@ -8,6 +8,8 @@
         %link{rel: "stylesheet", type: "text/css", href: "/css/comment.css"}
         
         %script{type: "text/javascript", src: "http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"}
+        %script{type: "text/javascript", src: "/3rdparty/jquery-ui-1.8.14.custom.min.js"}
+        %script{type: "text/javascript", src: "/3rdparty/jquery.slideto.min.js"}
         %script{type: "text/javascript", src: "/3rdparty/jquery.timeago.js"}
         %script{type: "text/javascript", src: "/3rdparty/diffHighlighter.js"}
         %script{type: "text/javascript", src: "/3rdparty/showdown.js"}
@@ -331,9 +333,11 @@
                   // add existing comments to the diff rows
                   insertComments(data.comments);
                   
-                  // TODO - use nice scrollTo plugin to animate & highlight
-                  $('html').scrollTop($(window.location.hash).offset().top);
-                  
+                  // use nice scrollTo plugin to animate scroll to hash & highlight
+                  $(window.location.hash).slideto({
+                      slide_duration: (_anim_speed * 3),
+                      highlight_duration: 3500
+                  });
           
                 }).error(function(qXHR, textStatus, errorThrown) {
                     $('.loading').html( 'error loading commit: ' + errorThrown );
