@@ -110,6 +110,9 @@
   color: #080;
 }
 
+.diff .noopline {
+	background-color: white;
+}
 .diff .whitespace {
 	background-color: rgba(255,0,0,0.5);
 	display: none;
