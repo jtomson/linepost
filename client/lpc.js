@@ -286,7 +286,7 @@ function addFileLink(name1, name2, id, mode_change, old_mode, new_mode) {
 
 function getCommitJSON() {
   // set global
-  _commit_url = window.location;
+  _commit_url = window.location.href.split('#')[0];
 
   $.getJSON(_commit_url + "?format=json", function(data) {
     $('.loading').hide();
