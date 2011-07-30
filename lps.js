@@ -56,7 +56,7 @@ var _isGoodSha = function(sha) {
 };
 
 // assumes comment is valid
-var _add_comment = function(comment, callback) {
+var _addComment = function(comment, callback) {
     _db.run('INSERT INTO comments VALUES(NULL, $repo_name, $commit_sha, $file_idx, $row_idx, $added_timestamp, $edited_timestamp, $comment_text, 0)',
             { '$repo_name': comment.repo_name,
               '$commit_sha': comment.commit_sha,
@@ -69,7 +69,7 @@ var _add_comment = function(comment, callback) {
             callback);
 };
 
-var _update_comment = function(id, comment_text, callback) {
+var _updateComment = function(id, comment_text, callback) {
     _db.run('UPDATE comments SET comment_text=$comment_text, edited_timestamp=$edited_timestamp WHERE id=$id',
             { '$comment_text': comment_text,
               '$edited_timestamp': new Date().getTime(),
@@ -78,7 +78,7 @@ var _update_comment = function(id, comment_text, callback) {
             callback);
 };
 
-var _delete_comment = function(id, callback) {
+var _deleteComment = function(id, callback) {
     // just mark the row as deleted
     _db.run('UPDATE comments SET deleted=1 WHERE id=$id',
             { '$id': id },
@@ -86,7 +86,7 @@ var _delete_comment = function(id, callback) {
 };
 
 // assume params are clean
-var _get_comments = function(repo_name, sha, callback) {
+var _getComments = function(repo_name, sha, callback) {
     // FIXME stores in memory so assuming not a whole lot of comments
     _db.all('SELECT * from comments WHERE repo_name = $repo_name AND commit_sha LIKE $commit_sha || "%" AND deleted = 0',
              { '$repo_name': repo_name,
@@ -103,7 +103,7 @@ var _get_comments = function(repo_name, sha, callback) {
 // Testing
 /*
 (function(){
-    _add_comment( {
+    _addComment( {
         'repo_name': 'linepost',
         'commit_sha': 'a084bff88',
         'file_idx': '1',
@@ -113,7 +113,7 @@ var _get_comments = function(repo_name, sha, callback) {
     },
     function(error) { if(error) { throw error; } });
 
-    //_get_comments('linepost', 'ae12', function(rows) {_log(res, sys.inspect(rows));});
+    //_getComments('linepost', 'ae12', function(rows) {_log(res, sys.inspect(rows));});
 }());
 */
 
@@ -143,7 +143,7 @@ var _content_sendError = function(error_code, error_msg, res) {
     _log(res, 'sent content error code: ' + error_code + ', error: ' + error_msg);
 };
 
-var _get_git_show = function(repo_name, sha, res, callback) {
+var _getGitShow = function(repo_name, sha, res, callback) {
     // SHA \01
     // Author Name <Author Email>\01
     // Subject \n Body \01
@@ -154,10 +154,7 @@ var _get_git_show = function(repo_name, sha, res, callback) {
           {cwd: _settings.repos[repo_name]},
           function(error, stdout, stderr) {
               if (error) {
-                  callback({status: 500, message: 'Error running git show: ' + error}, null);
-              }
-              else if (stderr) {
-                  callback({status: 500, message: 'Error running git show - has stderr: ' + stderr}, null);
+                  callback({status: 500, message: 'Error running git show: ' + error + ' stderr: ' + stderr}, null);
               }
               else if (stdout.length === 0) {
                   callback({status: 500, message: 'Error running git show - no output'}, null);
@@ -217,7 +214,7 @@ var _respond = {
         // return the git-show results & comments in one response
         var git_show_and_comments = {};
 
-        _get_git_show(repo_name, sha, res, function(error, result) {
+        _getGitShow(repo_name, sha, res, function(error, result) {
             if (error) {
                 _api_sendError(error.status, error.message, res);
                 return;
@@ -225,7 +222,7 @@ var _respond = {
 
             git_show_and_comments.git_show = result;
 
-            _get_comments(repo_name, sha, function(error, result) {
+            _getComments(repo_name, sha, function(error, result) {
                 if (error) {
                     _api_sendError(error.status, error.message, res);
                     return;
@@ -295,7 +292,7 @@ app.post('/:repo/:sha/comments', function(req, res) {
         edited_timestamp: now
     };
 
-    _add_comment(comment, function(error) {
+    _addComment(comment, function(error) {
         if (error) {
             _api_sendError(500, error, res);
         }
@@ -321,7 +318,7 @@ app.put('/:repo/:sha/comments/:id', function(req, res) {
     _log(res, 'Received PUT body: ' + sys.inspect(req.body));
 
     // TODO - validate?
-    _update_comment(req.params.id, req.body.comment_text, function(error) {
+    _updateComment(req.params.id, req.body.comment_text, function(error) {
         if (error) {
             _api_sendError(500, error, res);
         }
@@ -334,7 +331,7 @@ app.put('/:repo/:sha/comments/:id', function(req, res) {
 
 // delete a comment
 app.delete('/:repo/:sha/comments/:id', function(req, res) {
-    _delete_comment(req.params.id, function(error) {
+    _deleteComment(req.params.id, function(error) {
         if (error) {
             _api_sendError(500, error, res);
         }
