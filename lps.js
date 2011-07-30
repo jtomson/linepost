@@ -1,5 +1,4 @@
-// for brew install
-require.paths.unshift('/usr/local/lib/node/');
+require.paths.unshift('./node_modules');
 
 // ----------------
 // command for git bin
@@ -201,10 +200,9 @@ var _content_sendCommitPage = function(reponame, sha, res) {
 // ----- App middleware + routing
 app.use(connect.logger());
 
-app.use(express.staticProvider(__dirname + '/client'));
+app.use(express.static(__dirname + '/client'));
 
-app.use(express.bodyDecoder());
-
+app.use(express.bodyParser());
 
 // ----- html/json commit responder actions
 var _respond = {
@@ -212,7 +210,7 @@ var _respond = {
         // TODO - generate this once & cache,
         // use window.location to infer all ajax calls
         // no need to have a tailored-with-urls copy for this commit
-        res.render('commit.haml', {
+        res.render('commit.jade', {
             locals: {
                 'sha': sha,
                 'repo': repo_name 
