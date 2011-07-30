@@ -1,0 +1,23 @@
+var settings = {};
+
+settings.SMTP = {
+    host: 'smtp.gmail.com',
+    port: 465,
+    ssl: true,
+    use_authentication: true,
+    user: 'myuser@gmail.com',
+    pass: 'mypass'
+};
+
+settings.repos = {
+	'linepost': '/Users/jtomson/sandbox/linepost'
+}
+
+settings.listen_port = 3000;
+
+settings.git_bin = 'git';
+
+// desired path and name of sqlite db file
+settings.db_path = 'lps.sdb';
+
+module.exports = settings;

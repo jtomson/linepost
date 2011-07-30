@@ -1,17 +1,9 @@
 require.paths.unshift('./node_modules');
 
-// ----------------
-// command for git bin
-var _git_bin = 'git';
+var _settings = require('./settings');
 
-// repo_name -> local repo dir map
-var _repos = {
-    'linepost': '/Users/jtomson/sandbox/linepost'
-};
-
-// sqlite db
+// global sqlite db obj
 var _db = {};
-var _db_path = 'lps.sdb';
 
 // ----------------
 
@@ -21,6 +13,7 @@ var express = require('express'),
     fs = require('fs'),
     exec = require('child_process').exec,
     sqlite3 = require('sqlite3').verbose(),
+    mailer = require('nodemailer');
     app = express.createServer();
 
 //-------------------------
@@ -31,19 +24,18 @@ var express = require('express'),
     var is_new_db = false;
     
     try {
-        fs.lstatSync(_db_path);
+        fs.lstatSync(_settings.db_path);
     }
     catch (error) {
         is_new_db = true;
     }
     
-    _db = new sqlite3.Database(_db_path, function(error) { if (error) { throw error; } });
+    _db = new sqlite3.Database(_settings.db_path, function(error) { if (error) { throw error; } });
     _db.serialize(); // put in serial mode
     
     // calls are queued so we can start using the db even if we haven't completed open above
     if (is_new_db) {
         // FIXME - not optimized at all, just blatted for the time being
-        // TODO - date
         _db.run('CREATE TABLE comments( ' +
                 'id INTEGER PRIMARY KEY AUTOINCREMENT, ' +
                 'repo_name TEXT, ' +
@@ -155,8 +147,8 @@ var _get_git_show = function(repo_name, sha, res, callback) {
     // Author Date \01
     // DIFF EOF
     var format_str = '--pretty=format:"%H\01%an <%ae>\01%s\n%b\01%at\01"';
-    exec( _git_bin + ' show ' + format_str + ' ' + sha,
-          {cwd: _repos[repo_name]},
+    exec( _settings.git_bin + ' show ' + format_str + ' ' + sha,
+          {cwd: _settings.repos[repo_name]},
           function(error, stdout, stderr) {
               if (error) {
                   callback( {status: 500, message: 'Error running git show: ' + error}, null );
@@ -257,7 +249,7 @@ app.get('/:repo/:sha', function(req, res) {
     var format = req.query.format || 'html';
     
     // Do we have this repo name mapped to a local dir?
-    if (_repos[repo_name] === undefined) {
+    if (_settings.repos[repo_name] === undefined) {
         var msg = 'Undefined repo: "' + repo_name + '"';
         try {
             _respondWithError[format](404, msg, res);
@@ -312,6 +304,11 @@ app.post('/:repo/:sha/comments', function(req, res) {
              });
             res.write(result_stringified);
             res.end();
+            // TODO - setTimeout(~5mins, check if comment id still exists, then send)
+            // borrow showdown from the client
+            var showdown = require('./client/3rdparty/showdown.js');
+            console.log(showdown(comment.comment_text));
+            // _send_comment_mail
         }
     });
 });
