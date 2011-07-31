@@ -109,7 +109,7 @@ var _sendNewCommentEmail = function(comment) {
     // borrow showdown from the client
     var showdown = require('./client/3rdparty/showdown.js');
     // TODO - templatize
-    var preamble = '[gopost] '
+    var preamble = '[gopost] ';
     var email_body = comment.url +
                      '\n\n-----------------\n\n' +
                      comment.comment_text +
@@ -123,7 +123,7 @@ var _sendNewCommentEmail = function(comment) {
             sender: 'gopost-noreply@gmail.com',
             to: mailto,
             // TODO better commit info ([..] comment added to (repo/aef6538) - add new foo in bar baz)
-            subject: '[gopost] comment added to ' + comment.repo_name + '/' + comment.sha.substr(0,5),
+            subject: '[gopost] comment added to ' + comment.repo_name + '/' + comment.sha.substr(0, 5), 
             html: email_html,
             body: email_body
         },
@@ -309,6 +309,26 @@ var _respondWithError = {
 
 app.get('/:repo', function(req, res) {
     var repo_name = req.params.repo;
+
+    if (_settings.repos[repo_name] === undefined) {
+        var msg = 'Undefined repo: "' + repo_name + '"';
+        _content_sendError(404, msg, res);
+        return;
+    }
+
+    _getGitLog(repo_name, 100, function(error, result) {
+        if (error) {
+            _content_sendError(500, error, res);
+            return;
+        }
+        res.render('recent.jade', {
+            locals: {
+                'repo': repo_name,
+                'loglines': result
+            },
+            layout: false
+        });
+    });
 });
 
 app.get('/:repo/:sha', function(req, res) {
