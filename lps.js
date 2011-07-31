@@ -123,7 +123,7 @@ var _sendNewCommentEmail = function(comment) {
             sender: 'gopost-noreply@gmail.com',
             to: mailto,
             // TODO better commit info ([..] comment added to (repo/aef6538) - add new foo in bar baz)
-            subject: '[gopost] comment added to ' + comment.repo_name + '/' + comment.sha.substr(0, 5), 
+            subject: '[gopost] comment added to ' + comment.repo_name + '/' + comment.commit_sha.substr(0, 5), 
             html: email_html,
             body: email_body
         },
