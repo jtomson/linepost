@@ -111,9 +111,12 @@ function onCommentSubmitClicked() {
             comment.added_timestamp = now,
             comment.edited_timestamp = now,
 
+            $(add_comment_form).remove();
+
             insertComments([comment]);
 
-            $(add_comment_form).remove();
+            // animate what we just inserted
+            $('#comment_id_' + comment.id).hide().slideDown(_anim_speed);
         });
     }).error(function() {
         alert('problem submitting comment');
