@@ -20,6 +20,7 @@ var express = require('express'),
 // Initialization
 //-------------------------
 
+
 (function init() {
     var is_new_db = false;
 
@@ -108,6 +109,7 @@ var _sendNewCommentEmail = function(comment) {
     // borrow showdown from the client
     var showdown = require('./client/3rdparty/showdown.js');
     // TODO - templatize
+    var preamble = '[gopost] '
     var email_body = comment.url +
                      '\n\n-----------------\n\n' +
                      comment.comment_text +
@@ -120,7 +122,8 @@ var _sendNewCommentEmail = function(comment) {
         {
             sender: 'gopost-noreply@gmail.com',
             to: mailto,
-            subject: 'New gopost added to ' + comment.repo_name,
+            // TODO better commit info ([..] comment added to (repo/aef6538) - add new foo in bar baz)
+            subject: '[gopost] comment added to ' + comment.repo_name + '/' + comment.sha.substr(0,5),
             html: email_html,
             body: email_body
         },
@@ -211,12 +214,34 @@ var _getGitShow = function(repo_name, sha, callback) {
 
 var _getGitLog = function(repo_name, max_count, callback) {
     
-    // var format_str = '--pretty=format:"%H\01%cn <%ce>x`\01%s\n%b\01%at\01"';
+    var format_str = '--pretty=format:"%h\01%an <%ae>\01%s\01%at"';
 
-    // exec(_settings.git_bin + ' log --max-count ' + max_count + ' ' + format_str,
-    //      {cwd: _settings.repos[repo_name].repo_dir},
-    //      function(error, stdout, stderr) {
-
+    exec(_settings.git_bin + ' log --max-count=' + max_count + ' ' + format_str,
+        {cwd: _settings.repos[repo_name].repo_dir},
+        function(error, stdout, stderr) {
+            if (error) {
+                callback({status: 500, message: 'Error running git log: ' + error + 'stderr: ' + stderr}, null);
+                return;
+            }        
+            var lines = stdout.split('\n');
+            var result = [];
+            for (idx in lines) {
+                var split_line = lines[idx].split('\01');
+                if (split_line.length !== 4) {
+                    // TODO - shouldn't need to stop the whole boat when this happends
+                    callback({status: 500, message: 'Error running git log - bad output: ' + stdout}, null);
+                }
+                else {
+                    result.push({
+                        'sha': split_line[0],
+                        'author-name-and-email': split_line[1],
+                        'subject': split_line[2],
+                        'author-date': split_line[3]
+                    });
+                }
+            }
+            callback(null, result);
+        });
 };
 
 var _content_sendCommitPage = function(reponame, sha, res) {
