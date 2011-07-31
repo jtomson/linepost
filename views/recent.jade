@@ -1,0 +1,30 @@
+!!! strict
+html(lang="en")
+  head
+    // fixme - only use of sha and repo vars
+    title [gopost] recent activity in #{repo}
+    
+    link(rel="stylesheet", type="text/css", href="/css/recent.css")
+
+    script(type="text/javascript", src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js")
+    script(type="text/javascript", src="/3rdparty/jquery.timeago.js")
+    script(type="text/javascript")
+      function onBodyLoaded() {
+        $('.timestamp').timeago();
+      }
+
+  body(onload="onBodyLoaded()")
+    .wrap
+      .recent-commits
+        h1 recent commits in 
+          span.repo-name #{repo}
+        hr
+        table
+          - if (loglines.length)
+            - each line in loglines
+              tr.recent-commit-row
+                td.timestamp(datetime= line['author-date'] * 1000)
+                td.sha
+                  a(href="/" + repo + "/" + line.sha)= line.sha
+                td.subject= line.subject
+                td.author-name-and-email= line['author-name-and-email']
