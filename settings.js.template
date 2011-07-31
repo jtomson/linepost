@@ -10,14 +10,21 @@ settings.SMTP = {
 };
 
 settings.repos = {
-	'linepost': '/Users/jtomson/sandbox/linepost'
+	'linepost': {
+		repo_dir: '/Users/jtomson/sandbox/linepost',
+		mailto: 'james.b.tomson@gmail.com'
+	}
 }
 
-settings.listen_port = 3000;
+// The canonical base url for emailing links
+// e.g. <base_url>/reponame/sha/#comment_id_n
+// Note: remember to include trailing slash
+settings.base_url = 'http://localhost:3000/';
 
 settings.git_bin = 'git';
 
-// desired path and name of sqlite db file
 settings.db_path = 'lps.sdb';
+
+settings.listen_port = 3000;
 
 module.exports = settings;

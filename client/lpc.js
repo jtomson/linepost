@@ -235,8 +235,6 @@ function insertComments(comments) {
     else {
       $(comments_container).children().last().after(comment_div);
     }
-    
-    comment_div.hide().slideDown(_anim_speed);
 
   });
 }

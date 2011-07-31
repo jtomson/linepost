@@ -1364,4 +1364,9 @@ var escapeCharacters_callback = function(wholeMatch,m1) {
 // for use in node:
 // var showdown = require('<path-to-this-file>/showdown.js');
 // var html = showdown("## Some Markdown Text");
-module.exports = (new Showdown.converter()).makeHtml;
+try {
+	module.exports = (new Showdown.converter()).makeHtml;
+}
+catch (e) {
+	// do nothing, we're probably running in the client
+}

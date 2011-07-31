@@ -13,7 +13,7 @@ var express = require('express'),
     fs = require('fs'),
     exec = require('child_process').exec,
     sqlite3 = require('sqlite3').verbose(),
-    mailer = require('nodemailer');
+    nodemailer = require('nodemailer');
     app = express.createServer();
 
 //-------------------------
@@ -96,9 +96,39 @@ var _getComments = function(repo_name, sha, callback) {
              });
 };
 
-// var _send_comment_mail = function(comment) {
+var _sendNewCommentEmail = function(comment) {
+    var mailto = _settings.repos[comment.repo_name].mailto;
+    var SMTP = _settings.SMTP;
 
-// };
+    if (!mailto || !SMTP) {
+        console.log('mailto: ' + mailto + ', SMTP: ' + sys.inspect(SMTP));
+        return;
+    }
+
+    // borrow showdown from the client
+    var showdown = require('./client/3rdparty/showdown.js');
+    // TODO - templatize
+    var email_body = comment.url +
+                     '\n\n-----------------\n\n' +
+                     comment.comment_text +
+                     '\n\n-----------------\n\n';
+    var email_html = showdown(email_body);
+
+    nodemailer.SMTP = SMTP;
+    nodemailer.send_mail(
+        // e-mail options
+        {
+            sender: 'gopost-noreply@gmail.com',
+            to: mailto,
+            subject: 'New gopost added to ' + comment.repo_name,
+            html: email_html,
+            body: email_body
+        },
+        // callback function
+        function(error, success) {
+            console.log('Message ' + success ? 'sent' : 'failed');
+        });
+};
 
 // Testing
 /*
@@ -151,7 +181,7 @@ var _getGitShow = function(repo_name, sha, res, callback) {
     // DIFF EOF
     var format_str = '--pretty=format:"%H\01%an <%ae>\01%s\n%b\01%at\01"';
     exec(_settings.git_bin + ' show ' + format_str + ' ' + sha,
-          {cwd: _settings.repos[repo_name]},
+          {cwd: _settings.repos[repo_name].repo_dir},
           function(error, stdout, stderr) {
               if (error) {
                   callback({status: 500, message: 'Error running git show: ' + error + ' stderr: ' + stderr}, null);
@@ -244,12 +274,13 @@ var _respondWithError = {
 };
 
 app.get('/:repo/:sha', function(req, res) {
+    console.log(sys.inspect(req));
     var repo_name = req.params.repo;
     var sha = req.params.sha;
     var format = req.query.format || 'html';
 
     // Do we have this repo name mapped to a local dir?
-    if (_settings.repos[repo_name] === undefined) {
+    if (_settings.repos[repo_name].repo_dir === undefined) {
         var msg = 'Undefined repo: "' + repo_name + '"';
         try {
             _respondWithError[format](404, msg, res);
@@ -305,10 +336,12 @@ app.post('/:repo/:sha/comments', function(req, res) {
             res.write(result_stringified);
             res.end();
             // TODO - setTimeout(~5mins, check if comment id still exists, then send)
-            // borrow showdown from the client
-            var showdown = require('./client/3rdparty/showdown.js');
-            console.log(showdown(comment.comment_text));
-            // _send_comment_mail
+            // TODO - get comment anchor scheme elsewhere
+            comment.url = _settings.base_url +
+                          repo_name + '/' + sha +
+                          '#comment_id_' + this.lastID;
+
+            _sendNewCommentEmail(comment);
         }
     });
 });
