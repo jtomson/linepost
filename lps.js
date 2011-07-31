@@ -173,7 +173,7 @@ var _content_sendError = function(error_code, error_msg, res) {
     _log(res, 'sent content error code: ' + error_code + ', error: ' + error_msg);
 };
 
-var _getGitShow = function(repo_name, sha, res, callback) {
+var _getGitShow = function(repo_name, sha, callback) {
     // SHA \01
     // Author Name <Author Email>\01
     // Subject \n Body \01
@@ -204,10 +204,19 @@ var _getGitShow = function(repo_name, sha, res, callback) {
                             'diff': split_output_array[4]
                       };
                       callback(null, response);
-                      _log(res, 'sent good output from git-show');
                   }
               }
           });
+};
+
+var _getGitLog = function(repo_name, max_count, callback) {
+    
+    // var format_str = '--pretty=format:"%H\01%cn <%ce>x`\01%s\n%b\01%at\01"';
+
+    // exec(_settings.git_bin + ' log --max-count ' + max_count + ' ' + format_str,
+    //      {cwd: _settings.repos[repo_name].repo_dir},
+    //      function(error, stdout, stderr) {
+
 };
 
 var _content_sendCommitPage = function(reponame, sha, res) {
@@ -244,7 +253,7 @@ var _respond = {
         // return the git-show results & comments in one response
         var git_show_and_comments = {};
 
-        _getGitShow(repo_name, sha, res, function(error, result) {
+        _getGitShow(repo_name, sha, function(error, result) {
             if (error) {
                 _api_sendError(error.status, error.message, res);
                 return;
@@ -272,6 +281,10 @@ var _respondWithError = {
     'html': _content_sendError,
     'json': _api_sendError
 };
+
+app.get('/:repo', function(req, res) {
+    var repo_name = req.params.repo;
+});
 
 app.get('/:repo/:sha', function(req, res) {
     console.log(sys.inspect(req));

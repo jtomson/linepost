@@ -282,6 +282,10 @@ function addFileLink(name1, name2, id, mode_change, old_mode, new_mode) {
     $('.file-links').append(p);
 }
 
+function escapeHTML(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 function getCommitJSON() {
     // set global
     _commit_url = window.location.href.split('#')[0];
@@ -297,7 +301,7 @@ function getCommitJSON() {
 
         // populate info-bloc
         $('#sha').append(data.git_show.sha);
-        $('#author-name-and-email').append(data.git_show['author-name-and-email']);
+        $('#author-name-and-email').append(escapeHTML(data.git_show['author-name-and-email']));
 
         var showdown = new Showdown.converter();
         $('#subject-and-body').append(showdown.makeHtml(data.git_show['subject-and-body']));
