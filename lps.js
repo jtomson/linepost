@@ -187,7 +187,7 @@ var _getGitShow = function(repo_name, sha, callback) {
           {cwd: _settings.repos[repo_name].repo_dir},
           function(error, stdout, stderr) {
               if (error) {
-                  callback({status: 500, message: 'Error running git show: ' + error + ' stderr: ' + stderr}, null);
+                  callback({status: 500, message: 'Error running git show: ' + error}, null);
               }
               else if (stdout.length === 0) {
                   callback({status: 500, message: 'Error running git show - no output'}, null);
@@ -215,12 +215,12 @@ var _getGitShow = function(repo_name, sha, callback) {
 var _getGitLog = function(repo_name, max_count, callback) {
     
     var format_str = '--pretty=format:"%h\01%an <%ae>\01%s\01%at"';
-
-    exec(_settings.git_bin + ' log --max-count=' + max_count + ' ' + format_str,
+    console.log(' origin/' + _settings.repos[repo_name].branch);
+    exec(_settings.git_bin + ' log --max-count=' + max_count + ' ' + format_str + ' origin/' + _settings.repos[repo_name].branch,
         {cwd: _settings.repos[repo_name].repo_dir},
         function(error, stdout, stderr) {
             if (error) {
-                callback({status: 500, message: 'Error running git log: ' + error + 'stderr: ' + stderr}, null);
+                callback({status: 500, message: 'Error running git log: ' + error}, null);
                 return;
             }        
             var lines = stdout.split('\n');
@@ -318,12 +318,13 @@ app.get('/:repo', function(req, res) {
 
     _getGitLog(repo_name, 100, function(error, result) {
         if (error) {
-            _content_sendError(500, error, res);
+            _content_sendError(error.status, error.message, res);
             return;
         }
         res.render('recent.jade', {
             locals: {
                 'repo': repo_name,
+                'branch': _settings.repos[repo_name].branch,
                 'loglines': result
             },
             layout: false

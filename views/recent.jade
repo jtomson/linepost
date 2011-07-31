@@ -18,6 +18,7 @@ html(lang="en")
       .recent-commits
         h1 recent commits in 
           span.repo-name #{repo}
+          span.repo-branch #{branch}
         hr
         table
           - if (loglines.length)

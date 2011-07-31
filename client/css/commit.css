@@ -1,3 +1,8 @@
+body {
+    font-family: helvetica, arial;
+    font-size: 15px;
+}
+
 .info-block {
     font-size: 14px;
     background-color: #ECECEC;
@@ -8,13 +13,15 @@
     -webkit-box-shadow: 1px 1px 2px #DDD;
     border: 1px solid;
     white-space: pre;
-	font-family: Menlo, Monaco;
 	padding: 12px;
 	margin-bottom: 12px;
+    font-family: courier;
 }
 
 .info-block #subject-and-body {
     color: black;
+    font-family: helvetica, arial;
+    font-size: 15px
 }
 
 .file-links {
