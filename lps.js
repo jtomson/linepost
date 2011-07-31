@@ -190,7 +190,7 @@ var _getGitShow = function(repo_name, sha, res, callback) {
                   callback({status: 500, message: 'Error running git show - no output'}, null);
               }
               else {
-                  var split_output_array = stdout.split('\01');
+                  var split_output_array = stdout.split('\01', 5);
 
                   if (split_output_array.length !== 5) {
                       callback({status: 500, message: 'Error running git show - bad output: ' + stdout}, null);
