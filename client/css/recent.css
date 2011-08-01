@@ -32,6 +32,11 @@ body {
 	text-decoration: none;
 }
 
+.recent-commits tr:hover .sha a {
+        text-decoration: underline;
+}
+
+
 .recent-commits .subject {
 	padding: 12px 24px;
 	line-height: 1.2em;

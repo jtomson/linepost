@@ -18,6 +18,7 @@ html(lang="en")
     
 
   body( onload="getCommitJSON()" )
+    a(href="/#{repo}")#recents-link back to recents in #{repo}
     .loading loading...
     .wrap
       .info-block(style='display: none')

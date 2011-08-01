@@ -3,6 +3,11 @@ body {
     font-size: 15px;
 }
 
+#recents-link {
+	color: black;
+	font-size: .9em;
+}
+
 .info-block {
     font-size: 14px;
     background-color: #ECECEC;
@@ -12,9 +17,9 @@ body {
     margin: auto;
     -webkit-box-shadow: 1px 1px 2px #DDD;
     border: 1px solid;
-    white-space: pre;
-	padding: 12px;
-	margin-bottom: 12px;
+    white-space: pre-wrap;
+    padding: 12px;
+    margin-bottom: 12px;
     font-family: courier;
 }
 
