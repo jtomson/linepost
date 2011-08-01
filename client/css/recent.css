@@ -1,0 +1,53 @@
+body {
+	font-family: helvetica, arial;
+}
+
+.recent-commits h1 {
+	margin: 12px auto;
+	text-align: center;
+}
+
+.recent-commits hr {
+	width: 40%;
+	margin: 12px auto;
+}
+
+.recent-commits table {
+	width: 1024px;
+	margin: auto;
+	border-collapse: collapse;
+}
+
+.recent-commits tr {
+	margin: 0;
+}
+
+
+.recent-commits tr:nth-child(even) {
+	background-color: #ECECEC;
+}
+
+.recent-commits .sha a {
+	color: #A9A9A9;
+	text-decoration: none;
+}
+
+.recent-commits .subject {
+	padding: 12px 24px;
+	line-height: 1.2em;
+}
+
+.recent-commits .author-name-and-email {
+	color: lightblue;
+	padding: 4px 8px;
+}
+
+.recent-commits span {
+	border: 1px solid #ECECEC;
+	margin: 4px;
+}
+
+.recent-commits .timestamp {
+	white-space: pre;	
+	padding: 0 8px;
+}
