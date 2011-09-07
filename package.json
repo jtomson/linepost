@@ -5,6 +5,7 @@
     "express": "2.4.3",
     "sqlite3": "2.0.14",
     "jade": "0.13.0",
-    "nodemailer": "0.1.22"
+    "nodemailer": "0.1.22",
+    "connect": "1.7.0"
   }
 }
