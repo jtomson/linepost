@@ -214,7 +214,7 @@ var _getGitShow = function(repo_name, sha, callback) {
 
 var _getGitLog = function(repo_name, max_count, callback) {
     
-    var format_str = '--pretty=format:"%h\01%an <%ae>\01%s\01%at"';
+    var format_str = '--pretty=format:"%h\01%an\01%ae\01%s\01%at"';
     console.log(' origin/' + _settings.repos[repo_name].branch);
     exec(_settings.git_bin + ' log --max-count=' + max_count + ' ' + format_str + ' origin/' + _settings.repos[repo_name].branch,
         {cwd: _settings.repos[repo_name].repo_dir},
@@ -227,16 +227,17 @@ var _getGitLog = function(repo_name, max_count, callback) {
             var result = [];
             for (idx in lines) {
                 var split_line = lines[idx].split('\01');
-                if (split_line.length !== 4) {
+                if (split_line.length !== 5) {
                     // TODO - shouldn't need to stop the whole boat when this happends
                     callback({status: 500, message: 'Error running git log - bad output: ' + stdout}, null);
                 }
                 else {
                     result.push({
                         'sha': split_line[0],
-                        'author-name-and-email': split_line[1],
-                        'subject': split_line[2],
-                        'author-date': split_line[3]
+                        'author-name': split_line[1],
+                        'author-email': split_line[2],
+                        'subject': split_line[3],
+                        'author-date': split_line[4]
                     });
                 }
             }
