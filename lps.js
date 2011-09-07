@@ -182,7 +182,7 @@ var _getGitShow = function(repo_name, sha, callback) {
     // Subject \n Body \01
     // Author Date \01
     // DIFF EOF
-    var format_str = '--pretty=format:"%H\01%an <%ae>\01%s\n%b\01%at\01"';
+    var format_str = '--pretty=format:"%H\01%an\01%ae\01%s\n%b\01%at\01"';
     exec(_settings.git_bin + ' show ' + format_str + ' ' + sha,
           {cwd: _settings.repos[repo_name].repo_dir},
           function(error, stdout, stderr) {
@@ -193,18 +193,19 @@ var _getGitShow = function(repo_name, sha, callback) {
                   callback({status: 500, message: 'Error running git show - no output'}, null);
               }
               else {
-                  var split_output_array = stdout.split('\01', 5);
+                  var split_output_array = stdout.split('\01', 6);
 
-                  if (split_output_array.length !== 5) {
+                  if (split_output_array.length !== 6) {
                       callback({status: 500, message: 'Error running git show - bad output: ' + stdout}, null);
                   }
                   else {
                       var response = {
                             'sha': split_output_array[0],
-                            'author-name-and-email': split_output_array[1],
-                            'subject-and-body': split_output_array[2],
-                            'author-date': split_output_array[3],
-                            'diff': split_output_array[4]
+                            'author-name': split_output_array[1],
+                            'author-email': split_output_array[2],
+                            'subject-and-body': split_output_array[3],
+                            'author-date': split_output_array[4],
+                            'diff': split_output_array[5]
                       };
                       callback(null, response);
                   }
