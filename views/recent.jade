@@ -8,10 +8,25 @@ html(lang="en")
 
     script(type="text/javascript", src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js")
     script(type="text/javascript", src="/3rdparty/jquery.timeago.js")
-    script(type="text/javascript")
-      function onBodyLoaded() {
-        $('.timestamp').timeago();
-      }
+    - if (gravatar)
+      script(type="text/javascript", src="/3rdparty/md5-min.js")
+      script(type="text/javascript")
+        function onBodyLoaded() {
+          $('.timestamp').timeago();
+          $('td.author-name-and-email').before( function() {
+            var img = '<img src="http://www.gravatar.com/avatar/' +
+            hex_md5($("span.email", $(this)).text()) +
+            ".jpg?r=g&s=40&d=retro" +
+            '"/>';
+
+            return '<td class="gravatar">' + img + '</td>'
+          })
+        }
+    - else
+      script(type="text/javascript")
+        function onBodyLoaded() {
+          $('.timestamp').timeago();
+        }
 
   body(onload="onBodyLoaded()")
     .wrap
@@ -28,4 +43,6 @@ html(lang="en")
                 td.sha
                   a(href="/" + repo + "/" + line.sha)= line.sha
                 td.subject= line.subject
-                td.author-name-and-email= line['author-name-and-email']
+                td.author-name-and-email
+                  span #{line['author-name']}
+                  span.email #{line['author-email']}

@@ -304,7 +304,8 @@ function getCommitJSON() {
 
         // populate info-bloc
         $('#sha').append(data.git_show.sha);
-        $('#author-name-and-email').append(escapeHTML(data.git_show['author-name-and-email']));
+        $('#author-name-and-email').append(escapeHTML(data.git_show['author-name']));
+        $('#author-name-and-email').append(" &lt;" + escapeHTML(data.git_show['author-email']) + "&gt;");
 
         var showdown = new Showdown.converter();
         $('#subject-and-body').append(showdown.makeHtml(data.git_show['subject-and-body']));

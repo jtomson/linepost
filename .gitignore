@@ -1,2 +1,4 @@
 settings.js
 .DS_Store
+node_modules
+lps.sdb

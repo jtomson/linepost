@@ -182,7 +182,7 @@ var _getGitShow = function(repo_name, sha, callback) {
     // Subject \n Body \01
     // Author Date \01
     // DIFF EOF
-    var format_str = '--pretty=format:"%H\01%an <%ae>\01%s\n%b\01%at\01"';
+    var format_str = '--pretty=format:"%H\01%an\01%ae\01%s\n%b\01%at\01"';
     exec(_settings.git_bin + ' show ' + format_str + ' ' + sha,
           {cwd: _settings.repos[repo_name].repo_dir},
           function(error, stdout, stderr) {
@@ -193,18 +193,19 @@ var _getGitShow = function(repo_name, sha, callback) {
                   callback({status: 500, message: 'Error running git show - no output'}, null);
               }
               else {
-                  var split_output_array = stdout.split('\01', 5);
+                  var split_output_array = stdout.split('\01', 6);
 
-                  if (split_output_array.length !== 5) {
+                  if (split_output_array.length !== 6) {
                       callback({status: 500, message: 'Error running git show - bad output: ' + stdout}, null);
                   }
                   else {
                       var response = {
                             'sha': split_output_array[0],
-                            'author-name-and-email': split_output_array[1],
-                            'subject-and-body': split_output_array[2],
-                            'author-date': split_output_array[3],
-                            'diff': split_output_array[4]
+                            'author-name': split_output_array[1],
+                            'author-email': split_output_array[2],
+                            'subject-and-body': split_output_array[3],
+                            'author-date': split_output_array[4],
+                            'diff': split_output_array[5]
                       };
                       callback(null, response);
                   }
@@ -214,7 +215,7 @@ var _getGitShow = function(repo_name, sha, callback) {
 
 var _getGitLog = function(repo_name, max_count, callback) {
     
-    var format_str = '--pretty=format:"%h\01%an <%ae>\01%s\01%at"';
+    var format_str = '--pretty=format:"%h\01%an\01%ae\01%s\01%at"';
     console.log(' origin/' + _settings.repos[repo_name].branch);
     exec(_settings.git_bin + ' log --max-count=' + max_count + ' ' + format_str + ' origin/' + _settings.repos[repo_name].branch,
         {cwd: _settings.repos[repo_name].repo_dir},
@@ -227,16 +228,17 @@ var _getGitLog = function(repo_name, max_count, callback) {
             var result = [];
             for (idx in lines) {
                 var split_line = lines[idx].split('\01');
-                if (split_line.length !== 4) {
+                if (split_line.length !== 5) {
                     // TODO - shouldn't need to stop the whole boat when this happends
                     callback({status: 500, message: 'Error running git log - bad output: ' + stdout}, null);
                 }
                 else {
                     result.push({
                         'sha': split_line[0],
-                        'author-name-and-email': split_line[1],
-                        'subject': split_line[2],
-                        'author-date': split_line[3]
+                        'author-name': split_line[1],
+                        'author-email': split_line[2],
+                        'subject': split_line[3],
+                        'author-date': split_line[4]
                     });
                 }
             }
@@ -269,7 +271,8 @@ var _respond = {
         res.render('commit.jade', {
             locals: {
                 'sha': sha,
-                'repo': repo_name
+                'repo': repo_name,
+                'gravatar': _settings.gravatar
             },
             layout: false
         });
@@ -325,7 +328,8 @@ app.get('/:repo', function(req, res) {
             locals: {
                 'repo': repo_name,
                 'branch': _settings.repos[repo_name].branch,
-                'loglines': result
+                'loglines': result,
+                'gravatar': _settings.gravatar
             },
             layout: false
         });
