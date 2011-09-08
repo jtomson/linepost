@@ -28,4 +28,6 @@ settings.db_path = 'lps.sdb';
 
 settings.listen_port = 3000;
 
+settings.gravatar = false;
+
 module.exports = settings;

@@ -271,7 +271,8 @@ var _respond = {
         res.render('commit.jade', {
             locals: {
                 'sha': sha,
-                'repo': repo_name
+                'repo': repo_name,
+                'gravatar': _settings.gravatar
             },
             layout: false
         });
@@ -327,7 +328,8 @@ app.get('/:repo', function(req, res) {
             locals: {
                 'repo': repo_name,
                 'branch': _settings.repos[repo_name].branch,
-                'loglines': result
+                'loglines': result,
+                'gravatar': _settings.gravatar
             },
             layout: false
         });
