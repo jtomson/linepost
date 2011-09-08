@@ -47,7 +47,19 @@ body {
 	padding: 4px 8px;
 }
 
-.recent-commits span {
+.recent-commits .author-name-and-email .email:before {
+	content: " <"
+}
+
+.recent-commits .author-name-and-email .email:after {
+	content: ">"
+}
+.recent-commits span.repo-name {
+	border: 1px solid #ECECEC;
+	margin: 4px;
+}
+
+.recent-commits span.repo-branch {
 	border: 1px solid #ECECEC;
 	margin: 4px;
 }

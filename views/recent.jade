@@ -28,4 +28,6 @@ html(lang="en")
                 td.sha
                   a(href="/" + repo + "/" + line.sha)= line.sha
                 td.subject= line.subject
-                td.author-name-and-email #{line['author-name']} &lt;#{line['author-email']}&gt;
+                td.author-name-and-email
+                  span #{line['author-name']}
+                  span.email #{line['author-email']}
