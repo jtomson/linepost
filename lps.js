@@ -291,7 +291,7 @@ app.use(express.bodyParser());
 
 // ----- html/json commit responder actions
 var _respond = {
-    'html': function(repo_name, sha, res) {
+    'html': function(repo_name, branch, sha, res) {
         // TODO - generate this once & cache,
         // use window.location to infer all ajax calls
         // no need to have a tailored-with-urls copy for this commit
@@ -299,12 +299,13 @@ var _respond = {
             locals: {
                 'sha': sha,
                 'repo': repo_name,
+                'branch': branch,
                 'gravatar': _settings.gravatar
             },
             layout: false
         });
     },
-    'json': function(repo_name, sha, res) {
+    'json': function(repo_name, branch, sha, res) {
         // return the git-show results & comments in one response
         var git_show_and_comments = {};
 
@@ -348,6 +349,7 @@ app.get('/:repo', function(req, res) {
 app.get('/:repo/:branch/:sha', function(req, res) {
     console.log(sys.inspect(req));
     var repo_name = req.params.repo;
+    var branch = req.params.branch;
     var sha = req.params.sha;
     var format = req.query.format || 'html';
 
@@ -365,7 +367,7 @@ app.get('/:repo/:branch/:sha', function(req, res) {
 
     if (_isGoodSha(sha)) {
         try {
-            _respond[format](repo_name, sha, res);
+            _respond[format](repo_name, branch, sha, res);
         }
         catch (e2) {
             _content_sendError(415, 'Unknown format: ' + format, res);
