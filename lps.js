@@ -213,6 +213,26 @@ var _getGitShow = function(repo_name, sha, callback) {
           });
 };
 
+var _getGitBranches = function(repo_name, callback) {
+    console.log('running git branch');
+    // get git branches and remove any spaces or asterisks
+    exec(_settings.git_bin + ' branch | tr -d "* "',
+            {cwd: _settings.repos[repo_name].repo_dir},
+            function(error, stdout, stderr) {
+                if (error) {
+                    callback({status: 500, message: 'Error running git branch: ' + error}, null);
+                    return;
+                }
+                // split by newline
+                var result = stdout.split('\n');
+                // remove last blank entry
+                result.pop();
+                console.log(result);
+                callback(null, result);
+            });
+
+};
+
 var _getGitLog = function(repo_name, branch, max_count, callback) {
     
     var format_str = '--pretty=format:"%h\01%an\01%ae\01%s\01%at"';
@@ -264,19 +284,22 @@ var _renderRecentBranch = function (req, res, branch) {
         return;
     }
 
-    _getGitLog(repo_name, branch, 100, function(error, result) {
-        if (error) {
-            _content_sendError(error.status, error.message, res);
-            return;
-        }
-        res.render('recent.jade', {
-            locals: {
-                'repo': repo_name,
-                'branch': branch,
-                'loglines': result,
-                'gravatar': _settings.gravatar
-            },
-            layout: false
+    _getGitBranches(repo_name, function(error, branches_result) {
+        _getGitLog(repo_name, branch, 100, function(error, result) {
+            if (error) {
+                _content_sendError(error.status, error.message, res);
+                return;
+            }
+            res.render('recent.jade', {
+                locals: {
+                    'repo': repo_name,
+                    'branch': branch,
+                    'loglines': result,
+                    'gravatar': _settings.gravatar,
+                    'branches': branches_result
+                },
+                layout: false
+            });
         });
     });
 };

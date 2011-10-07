@@ -20,7 +20,11 @@ html(lang="en")
             '"/>';
 
             return '<td class="gravatar">' + img + '</td>'
-          })
+          });
+
+          $('select').change( function (){
+              window.location = "/#{repo}/" + $('select option:selected').text();
+          });
         }
     - else
       script(type="text/javascript")
@@ -35,6 +39,13 @@ html(lang="en")
           span.repo-name #{repo}
           span.repo-branch #{branch}
         hr
+        select
+          - each branch_name in branches
+            - if (branch_name == branch)
+              option(selected= "selected")= branch_name
+            - else
+              option= branch_name
+
         table
           - if (loglines.length)
             - each line in loglines
