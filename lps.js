@@ -213,11 +213,31 @@ var _getGitShow = function(repo_name, sha, callback) {
           });
 };
 
-var _getGitLog = function(repo_name, max_count, callback) {
+var _getGitBranches = function(repo_name, callback) {
+    console.log('running git branch');
+    // get git branches and remove any spaces or asterisks
+    exec(_settings.git_bin + ' branch | tr -d "* "',
+            {cwd: _settings.repos[repo_name].repo_dir},
+            function(error, stdout, stderr) {
+                if (error) {
+                    callback({status: 500, message: 'Error running git branch: ' + error}, null);
+                    return;
+                }
+                // split by newline
+                var result = stdout.split('\n');
+                // remove last blank entry
+                result.pop();
+                console.log(result);
+                callback(null, result);
+            });
+
+};
+
+var _getGitLog = function(repo_name, branch, max_count, callback) {
     
     var format_str = '--pretty=format:"%h\01%an\01%ae\01%s\01%at"';
-    console.log(' origin/' + _settings.repos[repo_name].branch);
-    exec(_settings.git_bin + ' log --max-count=' + max_count + ' ' + format_str + ' origin/' + _settings.repos[repo_name].branch,
+    console.log(' origin/' + branch);
+    exec(_settings.git_bin + ' log --max-count=' + max_count + ' ' + format_str + ' origin/' + branch,
         {cwd: _settings.repos[repo_name].repo_dir},
         function(error, stdout, stderr) {
             if (error) {
@@ -255,6 +275,36 @@ var _content_sendCommitPage = function(reponame, sha, res) {
         layout: false});
 };
 
+var _renderRecentBranch = function (req, res, branch) {
+    var repo_name = req.params.repo;
+
+    if (_settings.repos[repo_name] === undefined) {
+        var msg = 'Undefined repo: "' + repo_name + '"';
+        _content_sendError(404, msg, res);
+        return;
+    }
+
+    _getGitBranches(repo_name, function(error, branches_result) {
+        _getGitLog(repo_name, branch, 100, function(error, result) {
+            if (error) {
+                _content_sendError(error.status, error.message, res);
+                return;
+            }
+            res.render('recent.jade', {
+                locals: {
+                    'repo': repo_name,
+                    'branch': branch,
+                    'loglines': result,
+                    'gravatar': _settings.gravatar,
+                    'branches': branches_result
+                },
+                layout: false
+            });
+        });
+    });
+};
+
+
 // ----- App middleware + routing
 app.use(connect.logger());
 
@@ -264,7 +314,7 @@ app.use(express.bodyParser());
 
 // ----- html/json commit responder actions
 var _respond = {
-    'html': function(repo_name, sha, res) {
+    'html': function(repo_name, branch, sha, res) {
         // TODO - generate this once & cache,
         // use window.location to infer all ajax calls
         // no need to have a tailored-with-urls copy for this commit
@@ -272,12 +322,13 @@ var _respond = {
             locals: {
                 'sha': sha,
                 'repo': repo_name,
+                'branch': branch,
                 'gravatar': _settings.gravatar
             },
             layout: false
         });
     },
-    'json': function(repo_name, sha, res) {
+    'json': function(repo_name, branch, sha, res) {
         // return the git-show results & comments in one response
         var git_show_and_comments = {};
 
@@ -310,35 +361,18 @@ var _respondWithError = {
     'json': _api_sendError
 };
 
-app.get('/:repo', function(req, res) {
-    var repo_name = req.params.repo;
-
-    if (_settings.repos[repo_name] === undefined) {
-        var msg = 'Undefined repo: "' + repo_name + '"';
-        _content_sendError(404, msg, res);
-        return;
-    }
-
-    _getGitLog(repo_name, 100, function(error, result) {
-        if (error) {
-            _content_sendError(error.status, error.message, res);
-            return;
-        }
-        res.render('recent.jade', {
-            locals: {
-                'repo': repo_name,
-                'branch': _settings.repos[repo_name].branch,
-                'loglines': result,
-                'gravatar': _settings.gravatar
-            },
-            layout: false
-        });
-    });
+app.get('/:repo/:branch', function(req, res) {
+    _renderRecentBranch(req, res, req.params.branch);
 });
 
-app.get('/:repo/:sha', function(req, res) {
+app.get('/:repo', function(req, res) {
+    _renderRecentBranch(req, res, "master");
+});
+
+app.get('/:repo/:branch/:sha', function(req, res) {
     console.log(sys.inspect(req));
     var repo_name = req.params.repo;
+    var branch = req.params.branch;
     var sha = req.params.sha;
     var format = req.query.format || 'html';
 
@@ -356,7 +390,7 @@ app.get('/:repo/:sha', function(req, res) {
 
     if (_isGoodSha(sha)) {
         try {
-            _respond[format](repo_name, sha, res);
+            _respond[format](repo_name, branch, sha, res);
         }
         catch (e2) {
             _content_sendError(415, 'Unknown format: ' + format, res);
@@ -369,7 +403,7 @@ app.get('/:repo/:sha', function(req, res) {
 });
 
 // add a new comment
-app.post('/:repo/:sha/comments', function(req, res) {
+app.post('/:repo/:branch/:sha/comments', function(req, res) {
     var repo_name = req.params.repo;
     var sha = req.params.sha;
     _log(res, 'Received POST body: ' + sys.inspect(req.body));
@@ -401,7 +435,7 @@ app.post('/:repo/:sha/comments', function(req, res) {
             // TODO - setTimeout(~5mins, check if comment id still exists, then send)
             // TODO - get comment anchor scheme elsewhere
             comment.url = _settings.base_url +
-                          repo_name + '/' + sha +
+                          repo_name + '/sha/' + sha +
                           '#comment_id_' + this.lastID;
 
             _sendNewCommentEmail(comment);
@@ -410,7 +444,7 @@ app.post('/:repo/:sha/comments', function(req, res) {
 });
 
 // edit an existing comment
-app.put('/:repo/:sha/comments/:id', function(req, res) {
+app.put('/:repo/:branch/:sha/comments/:id', function(req, res) {
     _log(res, 'Received PUT body: ' + sys.inspect(req.body));
 
     // TODO - validate?
@@ -426,7 +460,7 @@ app.put('/:repo/:sha/comments/:id', function(req, res) {
 });
 
 // delete a comment
-app.delete('/:repo/:sha/comments/:id', function(req, res) {
+app.delete('/:repo/:branch/:sha/comments/:id', function(req, res) {
     _deleteComment(req.params.id, function(error) {
         if (error) {
             _api_sendError(500, error, res);
