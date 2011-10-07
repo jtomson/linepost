@@ -55,7 +55,7 @@ html(lang="en")
               tr.recent-commit-row
                 td.timestamp(datetime= line['author-date'] * 1000)
                 td.sha
-                  a(href="/#{repo}/#{branch}/#{line.sha}")= line.sha
+                  a(href="/#{repo}/#{encodeURIComponent(branch)}/#{line.sha}")= line.sha
                 td.subject= line.subject
                 td.author-name-and-email
                   span #{line['author-name']}
