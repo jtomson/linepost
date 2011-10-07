@@ -18,7 +18,7 @@ html(lang="en")
     
 
   body( onload="getCommitJSON()" )
-    a(href="/#{repo}/#{branch}")#recents-link back to recents in #{repo} #{branch}
+    a(href="/#{repo}/#{encodeURIComponent(branch)}")#recents-link back to recents in #{repo} #{branch}
     .loading loading...
     .wrap
       .info-block(style='display: none')
