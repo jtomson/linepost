@@ -362,7 +362,7 @@ var _respondWithError = {
 };
 
 app.get('/:repo/:branch', function(req, res) {
-    _renderRecentBranch(req, res, req.params.branch);
+    _renderRecentBranch(req, res, decodeURIComponent(req.params.branch));
 });
 
 app.get('/:repo', function(req, res) {
