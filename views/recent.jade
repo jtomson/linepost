@@ -23,7 +23,10 @@ html(lang="en")
           });
 
           $('select').change( function (){
-              window.location = "/#{repo}/" + $('select option:selected').text();
+              var branch_page = "/#{repo}/" +
+                      encodeURIComponent($('select option:selected').text());
+
+              window.location = branch_page;
           });
         }
     - else
