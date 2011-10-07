@@ -13,7 +13,6 @@ settings.repos = {
     'linepost': {
         repo_dir: '/Users/jtomson/sandbox/linepost',
         mailto: 'james.b.tomson@gmail.com',
-        branch: 'master'
     }
 }
 
