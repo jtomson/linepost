@@ -236,8 +236,8 @@ var _getGitBranches = function(repo_name, callback) {
 var _getGitLog = function(repo_name, branch, max_count, callback) {
     
     var format_str = '--pretty=format:"%h\01%an\01%ae\01%s\01%at"';
-    console.log(' origin/' + branch);
-    exec(_settings.git_bin + ' log --max-count=' + max_count + ' ' + format_str + ' origin/' + branch,
+    console.log(branch);
+    exec(_settings.git_bin + ' log --max-count=' + max_count + ' ' + format_str + ' ' + branch,
         {cwd: _settings.repos[repo_name].repo_dir},
         function(error, stdout, stderr) {
             if (error) {
@@ -290,6 +290,8 @@ var _renderRecentBranch = function (req, res, branch) {
                 _content_sendError(error.status, error.message, res);
                 return;
             }
+            // TODO - check if requested branch exists in the list,
+            // error out if it doesn't
             res.render('recent.jade', {
                 locals: {
                     'repo': repo_name,
@@ -360,6 +362,19 @@ var _respondWithError = {
     'html': _content_sendError,
     'json': _api_sendError
 };
+
+// support old-style linepost urls to master, i.e. no branch specified
+app.get('/:repo/:shaCandidate', function(req, res, next) {
+    var shaCandidate = req.params.shaCandidate;
+    if (_isGoodSha(shaCandidate)) {
+        // assume master
+        // TODO - just handle branch-less urls to commits
+        res.redirect('/' + req.params.repo + '/master/' + req.params.shaCandidate);
+    }
+    else {
+        next(); // try it as a branch
+    }
+});
 
 app.get('/:repo/:branch', function(req, res) {
     _renderRecentBranch(req, res, decodeURIComponent(req.params.branch));
