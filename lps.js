@@ -285,14 +285,18 @@ var _renderRecentBranch = function (req, res, branch) {
     }
 
     _getGitBranches(repo_name, function(error, branches_result) {
+        
+        if (branches_result.indexOf(branch) < 0) {
+            _content_sendError(404, "Unknown branch: '" + branch + "'", res);
+            return;
+        }
+        
         _getGitLog(repo_name, branch, 100, function(error, result) {
             if (error) {
                 _content_sendError(error.status, error.message, res);
-                return;
             }
-            // TODO - check if requested branch exists in the list,
-            // error out if it doesn't
-            res.render('recent.jade', {
+            else {
+                res.render('recent.jade', {
                 locals: {
                     'repo': repo_name,
                     'branch': branch,
@@ -300,8 +304,8 @@ var _renderRecentBranch = function (req, res, branch) {
                     'gravatar': _settings.gravatar,
                     'branches': branches_result
                 },
-                layout: false
-            });
+                layout: false});
+            }
         });
     });
 };
