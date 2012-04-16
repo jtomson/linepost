@@ -1,5 +1,3 @@
-require.paths.unshift('./node_modules');
-
 var _settings = require('./settings');
 
 // global sqlite db obj
@@ -9,7 +7,7 @@ var _db = {};
 
 var express = require('express'),
     connect = require('connect'),
-    sys = require('sys'),
+    util = require('util'),
     fs = require('fs'),
     exec = require('child_process').exec,
     sqlite3 = require('sqlite3').verbose(),
@@ -102,7 +100,7 @@ var _sendNewCommentEmail = function(comment) {
     var SMTP = _settings.SMTP;
 
     if (!mailto || !SMTP) {
-        console.log('mailto: ' + mailto + ', SMTP: ' + sys.inspect(SMTP));
+        console.log('mailto: ' + mailto + ', SMTP: ' + util.inspect(SMTP));
         return;
     }
 
@@ -146,7 +144,7 @@ var _sendNewCommentEmail = function(comment) {
     },
     function(error) { if(error) { throw error; } });
 
-    //_getComments('linepost', 'ae12', function(rows) {_log(res, sys.inspect(rows));});
+    //_getComments('linepost', 'ae12', function(rows) {_log(res, util.inspect(rows));});
 }());
 */
 
@@ -389,7 +387,7 @@ app.get('/:repo', function(req, res) {
 });
 
 app.get('/:repo/:branch/:sha', function(req, res) {
-    console.log(sys.inspect(req));
+    console.log(util.inspect(req));
     var repo_name = req.params.repo;
     var branch = req.params.branch;
     var sha = req.params.sha;
@@ -425,7 +423,7 @@ app.get('/:repo/:branch/:sha', function(req, res) {
 app.post('/:repo/:branch/:sha/comments', function(req, res) {
     var repo_name = req.params.repo;
     var sha = req.params.sha;
-    _log(res, 'Received POST body: ' + sys.inspect(req.body));
+    _log(res, 'Received POST body: ' + util.inspect(req.body));
 
     // TODO - validate vals?
     var now = new Date().getTime();
@@ -464,7 +462,7 @@ app.post('/:repo/:branch/:sha/comments', function(req, res) {
 
 // edit an existing comment
 app.put('/:repo/:branch/:sha/comments/:id', function(req, res) {
-    _log(res, 'Received PUT body: ' + sys.inspect(req.body));
+    _log(res, 'Received PUT body: ' + util.inspect(req.body));
 
     // TODO - validate?
     _updateComment(req.params.id, req.body.comment_text, function(error) {
