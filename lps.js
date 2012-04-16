@@ -1,5 +1,3 @@
-require.paths.unshift('./node_modules');
-
 var _settings = require('./settings');
 
 // global sqlite db obj
@@ -9,7 +7,7 @@ var _db = {};
 
 var express = require('express'),
     connect = require('connect'),
-    sys = require('sys'),
+    util = require('util'),
     fs = require('fs'),
     exec = require('child_process').exec,
     sqlite3 = require('sqlite3').verbose(),
@@ -102,7 +100,7 @@ var _sendNewCommentEmail = function(comment) {
     var SMTP = _settings.SMTP;
 
     if (!mailto || !SMTP) {
-        console.log('mailto: ' + mailto + ', SMTP: ' + sys.inspect(SMTP));
+        console.log('mailto: ' + mailto + ', SMTP: ' + util.inspect(SMTP));
         return;
     }
 
@@ -123,7 +121,7 @@ var _sendNewCommentEmail = function(comment) {
             sender: 'gopost-noreply@wimba.com',
             to: mailto,
             // TODO better commit info ([..] comment added to (repo/aef6538) - add new foo in bar baz)
-            subject: '[gopost] comment added to ' + comment.repo_name + '/' + comment.commit_sha.substr(0, 6), 
+            subject: '[gopost] comment added to ' + comment.repo_name + '/' + comment.commit_sha.substr(0, 6),
             html: email_html,
             body: email_body
         },
@@ -146,13 +144,13 @@ var _sendNewCommentEmail = function(comment) {
     },
     function(error) { if(error) { throw error; } });
 
-    //_getComments('linepost', 'ae12', function(rows) {_log(res, sys.inspect(rows));});
+    //_getComments('linepost', 'ae12', function(rows) {_log(res, util.inspect(rows));});
 }());
 */
 
 var _log = function(req, msg) {
     console.log((req.socket && req.socket.remoteAddress) +
-                ' - - [' + (new Date).toUTCString() + '] ' + msg);
+                ' - - [' + (new Date()).toUTCString() + '] ' + msg);
 };
 
 var _api_sendError = function(error_code, error_msg, res) {
@@ -234,20 +232,22 @@ var _getGitBranches = function(repo_name, callback) {
 };
 
 var _getGitLog = function(repo_name, branch, max_count, callback) {
-    
+
     var format_str = '--pretty=format:"%h\01%an\01%ae\01%s\01%at"';
     console.log(branch);
     exec(_settings.git_bin + ' log --max-count=' + max_count + ' ' + format_str + ' ' + branch,
         {cwd: _settings.repos[repo_name].repo_dir},
         function(error, stdout, stderr) {
+            var lines = stdout.split('\n'),
+                result = [],
+                i,
+                split_line;
             if (error) {
                 callback({status: 500, message: 'Error running git log: ' + error}, null);
                 return;
-            }        
-            var lines = stdout.split('\n');
-            var result = [];
-            for (idx in lines) {
-                var split_line = lines[idx].split('\01');
+            }
+            for(i = 0; i < lines.length; i++) {
+                split_line = lines[i].split('\01');
                 if (split_line.length !== 5) {
                     // TODO - shouldn't need to stop the whole boat when this happends
                     callback({status: 500, message: 'Error running git log - bad output: ' + stdout}, null);
@@ -285,12 +285,12 @@ var _renderRecentBranch = function (req, res, branch) {
     }
 
     _getGitBranches(repo_name, function(error, branches_result) {
-        
+
         if (branches_result.indexOf(branch) < 0) {
             _content_sendError(404, "Unknown branch: '" + branch + "'", res);
             return;
         }
-        
+
         _getGitLog(repo_name, branch, 100, function(error, result) {
             if (error) {
                 _content_sendError(error.status, error.message, res);
@@ -389,7 +389,7 @@ app.get('/:repo', function(req, res) {
 });
 
 app.get('/:repo/:branch/:sha', function(req, res) {
-    console.log(sys.inspect(req));
+    console.log(util.inspect(req));
     var repo_name = req.params.repo;
     var branch = req.params.branch;
     var sha = req.params.sha;
@@ -425,7 +425,7 @@ app.get('/:repo/:branch/:sha', function(req, res) {
 app.post('/:repo/:branch/:sha/comments', function(req, res) {
     var repo_name = req.params.repo;
     var sha = req.params.sha;
-    _log(res, 'Received POST body: ' + sys.inspect(req.body));
+    _log(res, 'Received POST body: ' + util.inspect(req.body));
 
     // TODO - validate vals?
     var now = new Date().getTime();
@@ -464,7 +464,7 @@ app.post('/:repo/:branch/:sha/comments', function(req, res) {
 
 // edit an existing comment
 app.put('/:repo/:branch/:sha/comments/:id', function(req, res) {
-    _log(res, 'Received PUT body: ' + sys.inspect(req.body));
+    _log(res, 'Received PUT body: ' + util.inspect(req.body));
 
     // TODO - validate?
     _updateComment(req.params.id, req.body.comment_text, function(error) {

@@ -12,9 +12,9 @@ settings.SMTP = {
 settings.repos = {
     'linepost': {
         repo_dir: '/Users/jtomson/sandbox/linepost',
-        mailto: 'james.b.tomson@gmail.com',
+        mailto: 'james.b.tomson@gmail.com'
     }
-}
+};
 
 // the canonical base url for emailing links
 // e.g. <base_url>/reponame/sha/#comment_id_n
