@@ -121,7 +121,7 @@ var _sendNewCommentEmail = function(comment) {
             sender: 'gopost-noreply@wimba.com',
             to: mailto,
             // TODO better commit info ([..] comment added to (repo/aef6538) - add new foo in bar baz)
-            subject: '[gopost] comment added to ' + comment.repo_name + '/' + comment.commit_sha.substr(0, 6), 
+            subject: '[gopost] comment added to ' + comment.repo_name + '/' + comment.commit_sha.substr(0, 6),
             html: email_html,
             body: email_body
         },
@@ -232,7 +232,7 @@ var _getGitBranches = function(repo_name, callback) {
 };
 
 var _getGitLog = function(repo_name, branch, max_count, callback) {
-    
+
     var format_str = '--pretty=format:"%h\01%an\01%ae\01%s\01%at"';
     console.log(branch);
     exec(_settings.git_bin + ' log --max-count=' + max_count + ' ' + format_str + ' ' + branch,
@@ -285,12 +285,12 @@ var _renderRecentBranch = function (req, res, branch) {
     }
 
     _getGitBranches(repo_name, function(error, branches_result) {
-        
+
         if (branches_result.indexOf(branch) < 0) {
             _content_sendError(404, "Unknown branch: '" + branch + "'", res);
             return;
         }
-        
+
         _getGitLog(repo_name, branch, 100, function(error, result) {
             if (error) {
                 _content_sendError(error.status, error.message, res);
