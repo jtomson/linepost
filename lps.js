@@ -150,7 +150,7 @@ var _sendNewCommentEmail = function(comment) {
 
 var _log = function(req, msg) {
     console.log((req.socket && req.socket.remoteAddress) +
-                ' - - [' + (new Date).toUTCString() + '] ' + msg);
+                ' - - [' + (new Date()).toUTCString() + '] ' + msg);
 };
 
 var _api_sendError = function(error_code, error_msg, res) {
@@ -238,14 +238,16 @@ var _getGitLog = function(repo_name, branch, max_count, callback) {
     exec(_settings.git_bin + ' log --max-count=' + max_count + ' ' + format_str + ' ' + branch,
         {cwd: _settings.repos[repo_name].repo_dir},
         function(error, stdout, stderr) {
+            var lines = stdout.split('\n'),
+                result = [],
+                i,
+                split_line;
             if (error) {
                 callback({status: 500, message: 'Error running git log: ' + error}, null);
                 return;
-            }        
-            var lines = stdout.split('\n');
-            var result = [];
-            for (idx in lines) {
-                var split_line = lines[idx].split('\01');
+            }
+            for(i = 0; i < lines.length; i++) {
+                split_line = lines[i].split('\01');
                 if (split_line.length !== 5) {
                     // TODO - shouldn't need to stop the whole boat when this happends
                     callback({status: 500, message: 'Error running git log - bad output: ' + stdout}, null);

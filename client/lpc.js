@@ -108,8 +108,8 @@ function onCommentSubmitClicked() {
             var now = new Date().getTime();
 
             comment.id = data.lastID;
-            comment.added_timestamp = now,
-            comment.edited_timestamp = now,
+            comment.added_timestamp = now;
+            comment.edited_timestamp = now;
 
             $(add_comment_form).remove();
 
@@ -250,21 +250,22 @@ function addFileLink(name1, name2, id, mode_change, old_mode, new_mode) {
     link.setAttribute('href', '#' + id);
     p.appendChild(link);
     var finalFile = '';
-    if (name1 == name2) {
+    if (name1 === name2) {
         finalFile = name1;
         img.src = '/images/modified.png';
         img.title = 'Modified file';
         p.title = 'Modified file';
-        if (mode_change)
-        p.appendChild(document.createTextNode(' mode ' + old_mode + ' -> ' + new_mode));
+        if (mode_change) {
+            p.appendChild(document.createTextNode(' mode ' + old_mode + ' -> ' + new_mode));
+        }
     }
-     else if (name1 == '/dev/null') {
+     else if (name1 === '/dev/null') {
         img.src = '/images/added.png';
         img.title = 'Added file';
         p.title = 'Added file';
         finalFile = name2;
     }
-     else if (name2 == '/dev/null') {
+     else if (name2 === '/dev/null') {
         img.src = '/images/removed.png';
         img.title = 'Removed file';
         p.title = 'Removed file';
