@@ -2,10 +2,10 @@
   "name": "linepost",
   "version": "0.0.1",
   "dependencies": {
-    "express": "2.4.3",
-    "sqlite3": "2.0.14",
-    "jade": "0.13.0",
-    "nodemailer": "0.1.22",
-    "connect": "1.7.0"
+    "express": "2.5.9",
+    "sqlite3": "2.1.1",
+    "jade": "0.24.0",
+    "nodemailer": "0.3.17",
+    "connect": "2.1.2"
   }
 }
